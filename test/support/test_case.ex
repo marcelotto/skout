@@ -26,4 +26,5 @@ defmodule Skout.Test.Case do
 
   def ex_outline(), do: @ex_outline
   def ex_manifest(), do: @ex_manifest
+  def ex_manifest(opts), do: Map.merge(ex_manifest, Map.new(opts))
 end

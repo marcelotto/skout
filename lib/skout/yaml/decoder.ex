@@ -31,22 +31,48 @@ defmodule Skout.YAML.Decoder do
             [{narrower_label, next_level}] = Map.to_list(hierarchy)
 
             with {:ok, outline} <-
-                   Outline.add(outline, {label, SKOS.narrower(), narrower_label}) do
+                   Outline.add(outline, label_statement(label, outline.manifest)),
+                 {:ok, outline} <-
+                   Outline.add(outline, label_statement(narrower_label, outline.manifest)),
+                 {:ok, outline} <-
+                   Outline.add(
+                     outline,
+                     narrower_statement(label, narrower_label, outline.manifest)
+                   ) do
               if next_level do
                 build_skos(outline, hierarchy, opts)
               else
                 outline
               end
-              |> cont_or_halt()
             end
+            |> cont_or_halt()
 
           narrower_label, {:ok, outline} ->
-            outline
-            |> Outline.add({label, SKOS.narrower(), narrower_label})
+            with {:ok, outline} <-
+                   Outline.add(outline, label_statement(narrower_label, outline.manifest)) do
+              outline
+              |> Outline.add(narrower_statement(label, narrower_label, outline.manifest))
+            end
             |> cont_or_halt()
         end)
         |> cont_or_halt()
     end)
+  end
+
+  defp narrower_statement(a, b, manifest) do
+    {
+      Manifest.term_to_iri(a, manifest),
+      SKOS.narrower(),
+      Manifest.term_to_iri(b, manifest)
+    }
+  end
+
+  defp label_statement(label, manifest) do
+    {
+      Manifest.term_to_iri(label, manifest),
+      SKOS.prefLabel(),
+      Manifest.term_to_literal(label, manifest)
+    }
   end
 
   defp cont_or_halt(result) do

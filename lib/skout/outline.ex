@@ -2,7 +2,7 @@ defmodule Skout.Outline do
   defstruct [:manifest, :skos]
 
   alias Skout.{Manifest, Materialization}
-  alias RDF.Graph
+  alias RDF.{IRI, Literal, Graph}
 
   def new(manifest) do
     %__MODULE__{
@@ -12,22 +12,15 @@ defmodule Skout.Outline do
   end
 
   def add(%__MODULE__{} = outline, triple) when is_tuple(triple) do
-    with {:ok, triple} <- coerce_triple(triple, outline.manifest) do
+    if RDF.Triple.valid?(triple) do
       {:ok,
        add_to_graph(
          outline,
          Materialization.apply(triple, outline.manifest.materialization)
        )}
+    else
+      {:error, "invalid triple: #{inspect(triple)}"}
     end
-  end
-
-  defp coerce_triple({subject, predicate, object}, manifest) do
-    {:ok,
-     {
-       Manifest.term_to_iri(subject, manifest),
-       Manifest.predicate_to_iri(predicate, manifest),
-       Manifest.term_to_iri(object, manifest)
-     }}
   end
 
   def update_graph(%__MODULE__{} = outline, fun) do

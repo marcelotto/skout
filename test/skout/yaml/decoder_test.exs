@@ -21,6 +21,13 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: %Skout.Manifest{base_iri: @example_base_iri},
                 skos:
                   RDF.Graph.new([
+                    # labels
+                    {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
+                    {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
+                    {EX.baz(), SKOS.prefLabel(), ~L"baz"},
+                    {EX.qux(), SKOS.prefLabel(), ~L"qux"},
+                    {EX.quux(), SKOS.prefLabel(), ~L"quux"},
+                    # Semantic relations
                     {EX.Foo, SKOS.narrower(), EX.Bar},
                     {EX.Bar, SKOS.broader(), EX.Foo},
                     {EX.Foo, SKOS.narrower(), EX.baz()},
