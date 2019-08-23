@@ -1,11 +1,14 @@
 defmodule Skout.YAML.Decoder do
   alias Skout.{Outline, Manifest, IriBuilder}
   alias RDF.NS.SKOS
+  alias RDF.IRI
 
   def decode(yaml_string, opts \\ []) do
     with {:ok, preamble, body} <- parse_yaml(yaml_string),
+         {concept_scheme, preamble} <- Map.pop(preamble, "concept_scheme", true),
          {:ok, manifest} <- build_manifest(preamble, opts),
-         {:ok, outline} <- Outline.new(manifest) do
+         {:ok, outline} <- Outline.new(manifest),
+         {:ok, outline} <- build_concept_scheme(outline, concept_scheme) do
       build_skos(outline, body, opts)
     end
   end
@@ -51,6 +54,28 @@ defmodule Skout.YAML.Decoder do
     |> Manifest.new()
   end
 
+  defp build_concept_scheme(outline, concept_scheme) do
+    concept_scheme_iri = concept_scheme_iri(concept_scheme, outline.manifest)
+
+    {:ok,
+     %Outline{
+       outline
+       | manifest: %Manifest{outline.manifest | concept_scheme: concept_scheme_iri},
+         skos: RDF.Graph.add(outline.skos, concept_scheme_statements(concept_scheme_iri))
+     }}
+  end
+
+  defp concept_scheme_iri(false, _), do: false
+  defp concept_scheme_iri(true, manifest), do: manifest.base_iri
+
+  defp concept_scheme_iri(concept_scheme, manifest) do
+    if IRI.absolute?(concept_scheme) do
+      IRI.new(concept_scheme)
+    else
+      IriBuilder.from_label(concept_scheme, manifest)
+    end
+  end
+
   defp build_skos(outline, map, opts) do
     Enum.reduce_while(map, {:ok, outline}, fn
       {label, narrower_labels}, {:ok, outline} ->
@@ -85,6 +110,12 @@ defmodule Skout.YAML.Decoder do
         end)
         |> cont_or_halt()
     end)
+  end
+
+  defp concept_scheme_statements(false), do: []
+
+  defp concept_scheme_statements(concept_scheme_iri) do
+    {concept_scheme_iri, RDF.type(), SKOS.ConceptScheme}
   end
 
   defp narrower_statement(a, b, manifest) do

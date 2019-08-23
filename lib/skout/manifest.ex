@@ -2,7 +2,9 @@ defmodule Skout.Manifest do
   defstruct base_iri: nil,
             iri_normalization: :camelize,
             default_language: nil,
-            materialization: %Skout.Materialization.Settings{}
+            materialization: %Skout.Materialization.Settings{},
+            # This just serves as a cache to not have query the graph for this all the time
+            concept_scheme: nil
 
   alias Skout.Materialization
   alias RDF.Literal

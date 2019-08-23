@@ -21,30 +21,38 @@ defmodule Skout.YAML.DecoderTest do
     - qux:
       - quux
   """
-  @example_skos RDF.Graph.new([
-                  # Lexical labels
-                  {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
-                  {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
-                  {EX.bazBaz(), SKOS.prefLabel(), ~L"baz baz"},
-                  {EX.qux(), SKOS.prefLabel(), ~L"qux"},
-                  {EX.quux(), SKOS.prefLabel(), ~L"quux"},
-                  # Semantic relations
-                  {EX.Foo, SKOS.narrower(), EX.Bar},
-                  {EX.Bar, SKOS.broader(), EX.Foo},
-                  {EX.Foo, SKOS.narrower(), EX.bazBaz()},
-                  {EX.bazBaz(), SKOS.broader(), EX.Foo},
-                  {EX.bazBaz(), SKOS.narrower(), EX.qux()},
-                  {EX.qux(), SKOS.broader(), EX.bazBaz()},
-                  {EX.qux(), SKOS.narrower(), EX.quux()},
-                  {EX.quux(), SKOS.broader(), EX.qux()}
-                ])
+
+  @example_concept_scheme_statements [
+    {ex_base_iri(), RDF.type(), SKOS.ConceptScheme}
+  ]
+
+  @example_skos RDF.Graph.new(
+                  [
+                    # Lexical labels
+                    {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
+                    {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
+                    {EX.bazBaz(), SKOS.prefLabel(), ~L"baz baz"},
+                    {EX.qux(), SKOS.prefLabel(), ~L"qux"},
+                    {EX.quux(), SKOS.prefLabel(), ~L"quux"},
+                    # Semantic relations
+                    {EX.Foo, SKOS.narrower(), EX.Bar},
+                    {EX.Bar, SKOS.broader(), EX.Foo},
+                    {EX.Foo, SKOS.narrower(), EX.bazBaz()},
+                    {EX.bazBaz(), SKOS.broader(), EX.Foo},
+                    {EX.bazBaz(), SKOS.narrower(), EX.qux()},
+                    {EX.qux(), SKOS.broader(), EX.bazBaz()},
+                    {EX.qux(), SKOS.narrower(), EX.quux()},
+                    {EX.quux(), SKOS.broader(), EX.qux()}
+                  ] ++
+                    @example_concept_scheme_statements
+                )
 
   test "empty SKOS outline" do
     assert decode("", base_iri: ex_base_iri()) ==
              {:ok,
               %Skout.Outline{
-                manifest: ex_manifest(),
-                skos: RDF.Graph.new()
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos: RDF.Graph.new(@example_concept_scheme_statements)
               }}
   end
 
@@ -52,7 +60,7 @@ defmodule Skout.YAML.DecoderTest do
     assert decode(@example_yaml_outline, base_iri: ex_base_iri()) ==
              {:ok,
               %Skout.Outline{
-                manifest: ex_manifest(),
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: @example_skos
               }}
   end
@@ -61,7 +69,7 @@ defmodule Skout.YAML.DecoderTest do
     assert decode(@example_yaml_outline_with_preamble, base_iri: ex_base_iri()) ==
              {:ok,
               %Skout.Outline{
-                manifest: ex_manifest(),
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: @example_skos
               }}
   end
@@ -180,6 +188,30 @@ defmodule Skout.YAML.DecoderTest do
       assert outline.manifest.iri_normalization == :underscore
       assert outline.manifest.materialization.inverse_hierarchy == false
       assert outline.manifest.materialization.inverse_related == false
+    end
+  end
+
+  describe "concept scheme" do
+    test "without the concept_scheme the base_iri is used" do
+      assert {:ok, outline} = decode("", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == ex_base_iri()
+    end
+
+    test "concept_scheme with simple term" do
+      assert {:ok, outline} = decode("concept_scheme: Foo\n---", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == iri(EX.Foo)
+    end
+
+    test "concept_scheme with iri" do
+      assert {:ok, outline} =
+               decode("concept_scheme: http://other_example.com\n---", base_iri: ex_base_iri())
+
+      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
+    end
+
+    test "setting the concept scheme to false prevents generating any concept scheme statements" do
+      assert {:ok, outline} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == false
     end
   end
 end
