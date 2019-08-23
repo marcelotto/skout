@@ -9,7 +9,7 @@ defmodule Skout.YAML.DecoderTest do
   ---
   Foo:
   - Bar
-  - baz:
+  - baz baz:
     - qux:
       - quux
   """
@@ -21,19 +21,19 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: %Skout.Manifest{base_iri: @example_base_iri},
                 skos:
                   RDF.Graph.new([
-                    # labels
+                    # Lexical labels
                     {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
                     {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
-                    {EX.baz(), SKOS.prefLabel(), ~L"baz"},
+                    {EX.bazBaz(), SKOS.prefLabel(), ~L"baz baz"},
                     {EX.qux(), SKOS.prefLabel(), ~L"qux"},
                     {EX.quux(), SKOS.prefLabel(), ~L"quux"},
                     # Semantic relations
                     {EX.Foo, SKOS.narrower(), EX.Bar},
                     {EX.Bar, SKOS.broader(), EX.Foo},
-                    {EX.Foo, SKOS.narrower(), EX.baz()},
-                    {EX.baz(), SKOS.broader(), EX.Foo},
-                    {EX.baz(), SKOS.narrower(), EX.qux()},
-                    {EX.qux(), SKOS.broader(), EX.baz()},
+                    {EX.Foo, SKOS.narrower(), EX.bazBaz()},
+                    {EX.bazBaz(), SKOS.broader(), EX.Foo},
+                    {EX.bazBaz(), SKOS.narrower(), EX.qux()},
+                    {EX.qux(), SKOS.broader(), EX.bazBaz()},
                     {EX.qux(), SKOS.narrower(), EX.quux()},
                     {EX.quux(), SKOS.broader(), EX.qux()}
                   ])

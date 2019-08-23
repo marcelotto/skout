@@ -1,5 +1,5 @@
 defmodule Skout.YAML.Decoder do
-  alias Skout.{Outline, Manifest}
+  alias Skout.{Outline, Manifest, IriBuilder}
   alias RDF.NS.SKOS
 
   def decode(yaml_string, opts) do
@@ -61,15 +61,15 @@ defmodule Skout.YAML.Decoder do
 
   defp narrower_statement(a, b, manifest) do
     {
-      Manifest.term_to_iri(a, manifest),
+      IriBuilder.from_label(a, manifest),
       SKOS.narrower(),
-      Manifest.term_to_iri(b, manifest)
+      IriBuilder.from_label(b, manifest)
     }
   end
 
   defp label_statement(label, manifest) do
     {
-      Manifest.term_to_iri(label, manifest),
+      IriBuilder.from_label(label, manifest),
       SKOS.prefLabel(),
       Manifest.term_to_literal(label, manifest)
     }
