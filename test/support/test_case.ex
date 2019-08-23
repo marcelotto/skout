@@ -21,10 +21,12 @@ defmodule Skout.Test.Case do
     end
   end
 
-  @ex_manifest Skout.Manifest.new(base_iri: EX)
-  @ex_outline Skout.Outline.new(@ex_manifest())
+  @ex_base_iri RDF.iri(EX.__base_iri__())
+  @ex_manifest Skout.Manifest.new!(base_iri: @ex_base_iri)
+  @ex_outline Skout.Outline.new!(@ex_manifest)
 
-  def ex_outline(), do: @ex_outline
+  def ex_base_iri(), do: @ex_base_iri
   def ex_manifest(), do: @ex_manifest
-  def ex_manifest(opts), do: Map.merge(ex_manifest, Map.new(opts))
+  def ex_manifest(opts), do: Map.merge(ex_manifest(), Map.new(opts))
+  def ex_outline(), do: @ex_outline
 end

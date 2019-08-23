@@ -2,25 +2,50 @@ defmodule Skout.YAML.Decoder do
   alias Skout.{Outline, Manifest, IriBuilder}
   alias RDF.NS.SKOS
 
-  def decode(yaml_string, opts) do
-    with {:ok, map} <- parse_yaml(yaml_string) do
-      build_outline(map, opts)
+  def decode(yaml_string, opts \\ []) do
+    with {:ok, preamble, body} <- parse_yaml(yaml_string),
+         {:ok, manifest} <- build_manifest(preamble, opts),
+         {:ok, outline} <- Outline.new(manifest) do
+      build_skos(outline, body, opts)
     end
   end
 
   defp parse_yaml(yaml_string) do
-    YamlElixir.read_from_string(yaml_string)
-  end
+    case YamlElixir.read_all_from_string(yaml_string) do
+      {:ok, [preamble, body]} ->
+        {:ok, preamble, body}
 
-  defp build_outline(map, opts) do
-    with {:ok, manifest} <- build_manifest(map, opts) do
-      Outline.new(manifest)
-      |> build_skos(map, opts)
+      {:ok, [body]} ->
+        {:ok, %{}, body}
+
+      {:ok, []} ->
+        {:ok, %{}, %{}}
+
+      {:ok, [preamble | multiple_bodies]} ->
+        # TODO: How to handle multiple docs? Just merge them?
+        raise """
+        Multiple documents are not supported yet.
+        Please raise an issue on https://github.com/marcelotto/skout/issues with your use case."
+        """
+
+      error ->
+        error
     end
   end
 
-  defp build_manifest(_map, opts) do
-    {:ok, %Manifest{base_iri: Keyword.get(opts, :base_iri)}}
+  defp build_manifest(preamble, opts) do
+    preamble
+    # TODO: maybe we want to limit to_existing_atom
+    |> Skout.Helper.atomize_keys()
+    |> Map.new(fn
+      {:materialization, opts} when is_list(opts) ->
+        {:materialization, Enum.reduce(opts, %{}, fn opt, opts -> Map.merge(opts, opt) end)}
+
+      other ->
+        other
+    end)
+    |> Map.merge(Map.new(opts))
+    |> Manifest.new()
   end
 
   defp build_skos(outline, map, opts) do

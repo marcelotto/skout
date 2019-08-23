@@ -24,7 +24,6 @@ defmodule Skout.IriBuilderTest do
       |> Enum.each(fn {label, iri} ->
         assert IriBuilder.from_label(label, ex_manifest()) == iri(iri)
       end)
-
     end
 
     test "with a term with whitespace and manifest.iri_normalization == :underscore" do
@@ -35,7 +34,8 @@ defmodule Skout.IriBuilderTest do
         "foo #1" => EX.foo_1()
       }
       |> Enum.each(fn {label, iri} ->
-        assert IriBuilder.from_label(label, ex_manifest(iri_normalization: :underscore)) == iri(iri)
+        assert IriBuilder.from_label(label, ex_manifest(iri_normalization: :underscore)) ==
+                 iri(iri)
       end)
     end
   end

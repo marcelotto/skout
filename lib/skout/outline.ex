@@ -5,10 +5,20 @@ defmodule Skout.Outline do
   alias RDF.{IRI, Literal, Graph}
 
   def new(manifest) do
-    %__MODULE__{
-      manifest: Manifest.new(manifest),
-      skos: Graph.new()
-    }
+    with {:ok, manifest} <- Manifest.new(manifest) do
+      {:ok,
+       %__MODULE__{
+         manifest: manifest,
+         skos: Graph.new()
+       }}
+    end
+  end
+
+  def new!(manifest) do
+    case new(manifest) do
+      {:ok, outline} -> outline
+      {:error, error} -> raise error
+    end
   end
 
   def add(%__MODULE__{} = outline, triple) when is_tuple(triple) do

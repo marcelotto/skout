@@ -7,9 +7,9 @@ defmodule Skout.ManifestTest do
   describe "new/1" do
     test "initializing the base_iri" do
       expected_base_iri = iri(EX.__base_iri__())
-      assert Manifest.new(base_iri: iri(EX.__base_iri__())).base_iri == expected_base_iri
-      assert Manifest.new(base_iri: to_string(EX.__base_iri__())).base_iri == expected_base_iri
-      assert Manifest.new(base_iri: EX).base_iri == expected_base_iri
+      assert Manifest.new!(base_iri: iri(EX.__base_iri__())).base_iri == expected_base_iri
+      assert Manifest.new!(base_iri: to_string(EX.__base_iri__())).base_iri == expected_base_iri
+      assert Manifest.new!(base_iri: EX).base_iri == expected_base_iri
     end
   end
 
