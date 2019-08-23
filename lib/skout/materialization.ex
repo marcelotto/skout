@@ -1,4 +1,10 @@
 defmodule Skout.Materialization do
+  defmodule Settings do
+    defstruct rdf_type: true,
+              inverse_hierarchy: true,
+              inverse_related: true
+  end
+
   alias RDF.NS.SKOS
 
   @broader SKOS.broader()
