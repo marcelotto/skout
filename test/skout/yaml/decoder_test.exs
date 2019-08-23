@@ -28,6 +28,12 @@ defmodule Skout.YAML.DecoderTest do
 
   @example_skos RDF.Graph.new(
                   [
+                    # Concepts
+                    {EX.Foo, RDF.type(), SKOS.Concept},
+                    {EX.Bar, RDF.type(), SKOS.Concept},
+                    {EX.bazBaz(), RDF.type(), SKOS.Concept},
+                    {EX.qux(), RDF.type(), SKOS.Concept},
+                    {EX.quux(), RDF.type(), SKOS.Concept},
                     # Lexical labels
                     {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
                     {EX.Bar, SKOS.prefLabel(), ~L"Bar"},

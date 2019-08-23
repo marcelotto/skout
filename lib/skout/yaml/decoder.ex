@@ -120,19 +120,19 @@ defmodule Skout.YAML.Decoder do
     {concept_scheme_iri, RDF.type(), SKOS.ConceptScheme}
   end
 
-  defp narrower_statement(a, b, manifest) do
-    {
-      IriBuilder.from_label(a, manifest),
-      SKOS.narrower(),
-      IriBuilder.from_label(b, manifest)
-    }
-  end
-
   defp label_statement(label, manifest) do
     {
       IriBuilder.from_label(label, manifest),
       SKOS.prefLabel(),
       Manifest.term_to_literal(label, manifest)
+    }
+  end
+
+  defp narrower_statement(a, b, manifest) do
+    {
+      IriBuilder.from_label(a, manifest),
+      SKOS.narrower(),
+      IriBuilder.from_label(b, manifest)
     }
   end
 end

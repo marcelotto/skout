@@ -12,7 +12,9 @@ defmodule Skout.OutlineTest do
                   ex_outline()
                   | skos:
                       RDF.graph([
+                        {EX.Foo, RDF.type(), SKOS.Concept},
                         {EX.Foo, SKOS.narrower(), EX.Bar},
+                        {EX.Bar, RDF.type(), SKOS.Concept},
                         {EX.Bar, SKOS.broader(), EX.Foo}
                       ])
                 }}
