@@ -5,17 +5,27 @@ defmodule Skout.Materialization do
   @narrower SKOS.narrower()
   @related SKOS.related()
 
-  def apply({subject, @broader, object} = triple, %{inverse_hierarchy: true}) do
-    [triple, {object, @narrower, subject}]
+  def infer({subject, @broader, object} = triple, %{inverse_hierarchy: true} = settings) do
+    {object, @narrower, subject}
+    |> continue(triple, settings, :inverse_hierarchy)
   end
 
-  def apply({subject, @narrower, object} = triple, %{inverse_hierarchy: true}) do
-    [triple, {object, @broader, subject}]
+  def infer({subject, @narrower, object} = triple, %{inverse_hierarchy: true} = settings) do
+    {object, @broader, subject}
+    |> continue(triple, settings, :inverse_hierarchy)
   end
 
-  def apply({subject, @related, object} = triple, %{inverse_related: true}) do
-    [triple, {object, @related, subject}]
+  def infer({subject, @related, object} = triple, %{inverse_related: true} = settings) do
+    {object, @related, subject}
+    |> continue(triple, settings, :inverse_related)
   end
 
-  def apply(triple, _), do: triple
+  def infer(triple, _), do: [triple]
+
+  defp continue(materialization, triple, settings, finished) do
+    [
+      materialization
+      | infer(triple, Map.put(settings, finished, false))
+    ]
+  end
 end

@@ -28,7 +28,7 @@ defmodule Skout.Outline do
       {:ok,
        add_to_graph(
          outline,
-         Materialization.apply(triple, outline.manifest.materialization)
+         Materialization.infer(triple, outline.manifest.materialization)
        )}
     else
       {:error, "invalid triple: #{inspect(triple)}"}
