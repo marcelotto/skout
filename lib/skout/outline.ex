@@ -4,6 +4,8 @@ defmodule Skout.Outline do
   alias Skout.{Manifest, Materialization}
   alias RDF.{IRI, Literal, Graph}
 
+  import Skout.Helper
+
   def new(manifest) do
     with {:ok, manifest} <- Manifest.new(manifest) do
       {:ok,
@@ -31,6 +33,14 @@ defmodule Skout.Outline do
     else
       {:error, "invalid triple: #{inspect(triple)}"}
     end
+  end
+
+  def add(%__MODULE__{} = outline, triples) when is_list(triples) do
+    Enum.reduce_while(triples, {:ok, outline}, fn triple, {:ok, outline} ->
+      outline
+      |> add(triple)
+      |> cont_or_halt()
+    end)
   end
 
   def update_graph(%__MODULE__{} = outline, fun) do

@@ -7,4 +7,14 @@ defmodule Skout.Helper do
       other -> other
     end)
   end
+
+  def cont_or_halt(result) do
+    case result do
+      {:ok, outline} ->
+        {:cont, {:ok, outline}}
+
+      {:error, error} ->
+        {:halt, {:error, error}}
+    end
+  end
 end

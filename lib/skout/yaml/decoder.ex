@@ -3,6 +3,8 @@ defmodule Skout.YAML.Decoder do
   alias RDF.NS.SKOS
   alias RDF.IRI
 
+  import Skout.Helper
+
   def decode(yaml_string, opts \\ []) do
     with {:ok, preamble, body} <- parse_yaml(yaml_string),
          {concept_scheme, preamble} <- Map.pop(preamble, "concept_scheme", true),
@@ -39,7 +41,7 @@ defmodule Skout.YAML.Decoder do
   defp build_manifest(preamble, opts) do
     preamble
     # TODO: maybe we want to limit to_existing_atom
-    |> Skout.Helper.atomize_keys()
+    |> atomize_keys()
     |> Map.new(fn
       {:base, base_iri} ->
         {:base_iri, base_iri}
@@ -132,15 +134,5 @@ defmodule Skout.YAML.Decoder do
       SKOS.prefLabel(),
       Manifest.term_to_literal(label, manifest)
     }
-  end
-
-  defp cont_or_halt(result) do
-    case result do
-      {:ok, outline} ->
-        {:cont, {:ok, outline}}
-
-      {:error, error} ->
-        {:halt, {:error, error}}
-    end
   end
 end
