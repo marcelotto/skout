@@ -79,6 +79,18 @@ defmodule Skout.YAML.DecoderTest do
       assert outline.manifest.base_iri == ~I<http://foo.com/>
     end
 
+    test "setting the base_iri with the base alias" do
+      assert {:ok, outline} =
+               decode("""
+               base: http://foo.com/
+               ---
+               Foo:
+                 - bar
+               """)
+
+      assert outline.manifest.base_iri == ~I<http://foo.com/>
+    end
+
     test "setting the default_language" do
       assert {:ok, outline} =
                decode(
@@ -144,7 +156,7 @@ defmodule Skout.YAML.DecoderTest do
       assert {:ok, outline} =
                decode(
                  """
-                 base_iri: http://foo.com/
+                 base: http://foo.com/
                  iri_normalization: camelize
                  default_language: en
                  materialization:

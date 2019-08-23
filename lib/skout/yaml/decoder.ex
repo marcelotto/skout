@@ -38,6 +38,9 @@ defmodule Skout.YAML.Decoder do
     # TODO: maybe we want to limit to_existing_atom
     |> Skout.Helper.atomize_keys()
     |> Map.new(fn
+      {:base, base_iri} ->
+        {:base_iri, base_iri}
+
       {:materialization, opts} when is_list(opts) ->
         {:materialization, Enum.reduce(opts, %{}, fn opt, opts -> Map.merge(opts, opt) end)}
 
