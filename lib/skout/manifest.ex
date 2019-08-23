@@ -4,12 +4,15 @@ defmodule Skout.Manifest do
             default_language: nil,
             materialization: %Skout.Materialization.Settings{}
 
+  alias Skout.Materialization
   alias RDF.Literal
+
+  import Skout.Helper
 
   def new(%__MODULE__{} = manifest), do: manifest |> validate()
 
   def new(opts) do
-    Skout.Manifest
+    __MODULE__
     |> struct(opts)
     |> normalize()
     |> validate()
@@ -26,23 +29,32 @@ defmodule Skout.Manifest do
   defp validate(%__MODULE__{} = manifest), do: {:ok, manifest}
 
   defp normalize(manifest) do
-    %Skout.Manifest{
+    manifest
+    |> normalize_base_iri()
+    |> normalize_iri_normalization()
+    |> normalize_materialization()
+  end
+
+  defp normalize_base_iri(%{base_iri: nil} = manifest), do: manifest
+
+  defp normalize_base_iri(%{base_iri: base_iri} = manifest) do
+    %__MODULE__{manifest | base_iri: RDF.IRI.coerce_base(manifest.base_iri)}
+  end
+
+  defp normalize_iri_normalization(%{iri_normalization: iri_normalization} = manifest)
+       when is_binary(iri_normalization) do
+    %__MODULE__{manifest | iri_normalization: String.to_existing_atom(manifest.iri_normalization)}
+  end
+
+  defp normalize_iri_normalization(manifest), do: manifest
+
+  defp normalize_materialization(%{materialization: %Materialization.Settings{}} = manifest),
+    do: manifest
+
+  defp normalize_materialization(%{materialization: materialization} = manifest) do
+    %__MODULE__{
       manifest
-      | base_iri: manifest.base_iri && RDF.IRI.coerce_base(manifest.base_iri),
-        iri_normalization:
-          if(is_binary(manifest.iri_normalization),
-            do: String.to_existing_atom(manifest.iri_normalization),
-            else: manifest.iri_normalization
-          ),
-        materialization:
-          if(match?(%Skout.Materialization.Settings{}, manifest.materialization),
-            do: manifest.materialization,
-            else:
-              struct(
-                %Skout.Materialization.Settings{},
-                Skout.Helper.atomize_keys(manifest.materialization)
-              )
-          )
+      | materialization: struct(%Materialization.Settings{}, atomize_keys(materialization))
     }
   end
 
