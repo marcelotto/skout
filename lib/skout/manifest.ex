@@ -39,7 +39,7 @@ defmodule Skout.Manifest do
 
   defp normalize_base_iri(%{base_iri: nil} = manifest), do: manifest
 
-  defp normalize_base_iri(%{base_iri: base_iri} = manifest) do
+  defp normalize_base_iri(manifest) do
     %__MODULE__{manifest | base_iri: RDF.IRI.coerce_base(manifest.base_iri)}
   end
 

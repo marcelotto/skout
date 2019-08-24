@@ -34,6 +34,12 @@ defmodule Skout.YAML.DecoderTest do
                     {EX.bazBaz(), RDF.type(), SKOS.Concept},
                     {EX.qux(), RDF.type(), SKOS.Concept},
                     {EX.quux(), RDF.type(), SKOS.Concept},
+                    # Concept scheme
+                    {EX.Foo, SKOS.inScheme(), ex_base_iri()},
+                    {EX.Bar, SKOS.inScheme(), ex_base_iri()},
+                    {EX.bazBaz(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.qux(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.quux(), SKOS.inScheme(), ex_base_iri()},
                     # Lexical labels
                     {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
                     {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
