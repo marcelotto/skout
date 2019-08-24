@@ -2,7 +2,7 @@ defmodule Skout.Outline do
   defstruct [:manifest, :skos]
 
   alias Skout.{Manifest, Materialization}
-  alias RDF.{IRI, Literal, Graph}
+  alias RDF.Graph
 
   import Skout.Helper
 
@@ -21,6 +21,10 @@ defmodule Skout.Outline do
       {:ok, outline} -> outline
       {:error, error} -> raise error
     end
+  end
+
+  def finalize(%__MODULE__{} = outline) do
+    add(outline, Materialization.infer_top_concepts(outline))
   end
 
   def add(%__MODULE__{} = outline, triple) when is_tuple(triple) do

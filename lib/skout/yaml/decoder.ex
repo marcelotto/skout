@@ -10,8 +10,9 @@ defmodule Skout.YAML.Decoder do
          {concept_scheme, preamble} <- Map.pop(preamble, "concept_scheme", true),
          {:ok, manifest} <- build_manifest(preamble, opts),
          {:ok, outline} <- Outline.new(manifest),
-         {:ok, outline} <- build_concept_scheme(outline, concept_scheme) do
-      build_skos(outline, body, opts)
+         {:ok, outline} <- build_concept_scheme(outline, concept_scheme),
+         {:ok, outline} <- build_skos(outline, body, opts) do
+      Outline.finalize(outline)
     end
   end
 

@@ -35,6 +35,8 @@ defmodule Skout.YAML.DecoderTest do
                     {EX.qux(), RDF.type(), SKOS.Concept},
                     {EX.quux(), RDF.type(), SKOS.Concept},
                     # Concept scheme
+                    {EX.Foo, SKOS.topConceptOf(), ex_base_iri()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.Foo},
                     {EX.Foo, SKOS.inScheme(), ex_base_iri()},
                     {EX.Bar, SKOS.inScheme(), ex_base_iri()},
                     {EX.bazBaz(), SKOS.inScheme(), ex_base_iri()},
