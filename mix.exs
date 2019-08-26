@@ -20,7 +20,10 @@ defmodule Skout.MixProject do
 
   defp deps do
     [
-      {:rdf, github: "marcelotto/rdf-ex"},
+      # {:rdf, "~> 0.6.2"},
+      {:rdf, path: "../../../RDF.ex/src/rdf"},
+      # {:sparql, "~> 0.3"},
+      {:sparql, path: "../../../RDF.ex/src/sparql"},
       {:yaml_elixir, "~> 2.4"}
     ]
   end
