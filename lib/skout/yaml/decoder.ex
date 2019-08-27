@@ -7,7 +7,15 @@ defmodule Skout.YAML.Decoder do
 
   def decode(yaml_string, opts \\ []) do
     with {:ok, preamble, body} <- parse_yaml(yaml_string),
-         {concept_scheme, preamble} <- Map.pop(preamble, "concept_scheme", true),
+         {concept_scheme, preamble} <-
+           (if Keyword.has_key?(opts, :concept_scheme) do
+              {
+                Keyword.get(opts, :concept_scheme),
+                Map.delete(preamble, "concept_scheme")
+              }
+            else
+              Map.pop(preamble, "concept_scheme", true)
+            end),
          {:ok, manifest} <- build_manifest(preamble, opts),
          {:ok, outline} <- Outline.new(manifest),
          {:ok, outline} <- build_concept_scheme(outline, concept_scheme),

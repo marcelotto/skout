@@ -88,6 +88,31 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
+
+  describe "concept scheme" do
+    test "without the concept_scheme the base_iri is used" do
+      assert {:ok, outline} = decode("", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == ex_base_iri()
+    end
+
+    test "concept_scheme with simple term" do
+      assert {:ok, outline} = decode("concept_scheme: Foo\n---", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == iri(EX.Foo)
+    end
+
+    test "concept_scheme with iri" do
+      assert {:ok, outline} =
+               decode("concept_scheme: http://other_example.com\n---", base_iri: ex_base_iri())
+
+      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
+    end
+
+    test "setting the concept scheme to false prevents generating any concept scheme statements" do
+      assert {:ok, outline} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
+      assert outline.manifest.concept_scheme == false
+    end
+  end
+
   describe "preamble" do
     test "setting the base_iri" do
       assert {:ok, outline} =
@@ -112,6 +137,19 @@ defmodule Skout.YAML.DecoderTest do
 
       assert outline.manifest.base_iri == ~I<http://foo.com/>
     end
+
+    test "setting the concept_scheme" do
+      assert {:ok, outline} =
+               decode("""
+               base_iri: http://foo.com/
+               ---
+               Foo:
+                 - bar
+               """, concept_scheme: false)
+
+      assert outline.manifest.concept_scheme == false
+    end
+
 
     test "setting the default_language" do
       assert {:ok, outline} =
@@ -202,30 +240,6 @@ defmodule Skout.YAML.DecoderTest do
       assert outline.manifest.iri_normalization == :underscore
       assert outline.manifest.materialization.inverse_hierarchy == false
       assert outline.manifest.materialization.inverse_related == false
-    end
-  end
-
-  describe "concept scheme" do
-    test "without the concept_scheme the base_iri is used" do
-      assert {:ok, outline} = decode("", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == ex_base_iri()
-    end
-
-    test "concept_scheme with simple term" do
-      assert {:ok, outline} = decode("concept_scheme: Foo\n---", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == iri(EX.Foo)
-    end
-
-    test "concept_scheme with iri" do
-      assert {:ok, outline} =
-               decode("concept_scheme: http://other_example.com\n---", base_iri: ex_base_iri())
-
-      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
-    end
-
-    test "setting the concept scheme to false prevents generating any concept scheme statements" do
-      assert {:ok, outline} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == false
     end
   end
 end
