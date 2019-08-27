@@ -54,4 +54,8 @@ defmodule Skout.Outline do
   def add_to_graph(%__MODULE__{} = outline, data) do
     update_graph(outline, &Graph.add(&1, data))
   end
+
+  defdelegate from_rdf(graph, opts \\ []), to: Skout.RDF.Import, as: :call
+
+  def to_rdf(%__MODULE__{} = outline), do: outline.skos
 end
