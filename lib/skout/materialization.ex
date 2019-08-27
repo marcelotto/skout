@@ -123,23 +123,9 @@ defmodule Skout.Materialization do
 
   def infer_top_concepts(outline) do
     if outline.manifest.concept_scheme do
-      top_concepts =
-        outline.skos
-        |> SPARQL.execute_query(
-          """
-          SELECT ?concept WHERE {
-            ?concept a skos:Concept .
-            MINUS {
-              ?concept skos:broader ?other_concept .
-            }
-          }
-          """,
-          default_prefixes: %{skos: SKOS}
-        )
-        |> SPARQL.Query.Result.get(:concept)
-        |> List.wrap()
-
-      Enum.reduce(top_concepts, [], fn top_concept, triples ->
+      outline
+      |> top_concepts()
+      |> Enum.reduce([], fn top_concept, triples ->
         [
           {top_concept, SKOS.topConceptOf(), outline.manifest.concept_scheme},
           {outline.manifest.concept_scheme, SKOS.hasTopConcept(), top_concept}
@@ -149,5 +135,23 @@ defmodule Skout.Materialization do
     else
       []
     end
+  end
+
+  @doc false
+  def top_concepts(outline) do
+    outline.skos
+    |> SPARQL.execute_query(
+      """
+      SELECT ?concept WHERE {
+        ?concept a skos:Concept .
+        MINUS {
+          ?concept skos:broader ?other_concept .
+        }
+      }
+      """,
+      default_prefixes: %{skos: SKOS}
+    )
+    |> SPARQL.Query.Result.get(:concept)
+    |> List.wrap()
   end
 end
