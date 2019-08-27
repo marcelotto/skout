@@ -35,7 +35,7 @@ defmodule Skout.YAML.Decoder do
       {:ok, []} ->
         {:ok, %{}, %{}}
 
-      {:ok, [preamble | multiple_bodies]} ->
+      {:ok, [_preamble | _multiple_bodies]} ->
         # TODO: How to handle multiple docs? Just merge them?
         raise """
         Multiple documents are not supported yet.

@@ -1,6 +1,5 @@
 defmodule Skout.RDF.Import do
   alias Skout.Outline
-  alias RDF.Graph
   alias RDF.NS.SKOS
 
   def call(graph, opts \\ []) do
@@ -26,7 +25,7 @@ defmodule Skout.RDF.Import do
     )
   end
 
-  defp concepts(graph, concept_scheme) do
+  defp concepts(graph, _concept_scheme) do
     graph
     |> SPARQL.execute_query(
       """
