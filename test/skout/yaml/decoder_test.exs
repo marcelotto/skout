@@ -9,7 +9,7 @@ defmodule Skout.YAML.DecoderTest do
   - Bar
   - baz baz:
     - qux:
-      - quux
+      - quux:
   """
 
   @example_yaml_outline_with_preamble """

@@ -106,7 +106,7 @@ defmodule Skout.YAML.Decoder do
               if next_level do
                 build_skos(outline, hierarchy, opts)
               else
-                outline
+                {:ok, outline}
               end
             end
             |> cont_or_halt()
