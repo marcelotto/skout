@@ -26,25 +26,40 @@ defmodule Skout.YAML.Encoder do
   def body(outline, opts) do
     outline
     |> Skout.Materialization.top_concepts()
-    |> concept_hierarchy(outline, 0, opts)
+    |> MapSet.new()
+    |> concept_hierarchy(outline, 0, MapSet.new(), opts)
   end
 
-  defp concept_hierarchy(concepts, outline, depth, opts) do
-    concepts
-    |> Enum.map(fn concept ->
-      description = Graph.description(outline.skos, concept)
+  defp concept_hierarchy(concepts, outline, depth, visited, opts) do
+    if MapSet.disjoint?(visited, concepts) do
+      concepts
+      |> Enum.map(fn concept ->
+        description = Graph.description(outline.skos, concept)
 
-      (Description.get(description, SKOS.prefLabel()) |> List.first() |> to_string()) <>
-        ":\n" <>
-        (concept
-         |> narrower_concepts(outline.skos)
-         |> concept_hierarchy(outline, depth + 1, opts)
-         |> case do
-           "" -> ""
-           next_level -> indentation(depth + 1) <> next_level
-         end)
-    end)
-    |> Enum.join(indentation(depth))
+        label =
+          Description.get(description, SKOS.prefLabel())
+          |> case do
+            nil -> raise "Missing label for concept #{concept}"
+            [label] -> to_string(label)
+          end
+
+        label <>
+          ":\n" <>
+          (concept
+           |> narrower_concepts(outline.skos)
+           |> MapSet.new()
+           |> concept_hierarchy(outline, depth + 1, MapSet.put(visited, concept), opts)
+           |> case do
+             "" -> ""
+             next_level -> indentation(depth + 1) <> next_level
+           end)
+      end)
+      |> Enum.join(indentation(depth))
+    else
+      raise "concept scheme contains a circle through #{
+              inspect(MapSet.intersection(concepts, visited) |> MapSet.to_list())
+            }"
+    end
   end
 
   defp narrower_concepts(concept, graph) do

@@ -41,6 +41,12 @@ defmodule Skout.YAML.EncoderTest do
               """}
   end
 
+  test "SKOS outline with circles" do
+    assert_raise RuntimeError, ~r/concept scheme contains a circle/, fn ->
+      encode(outline_with_circle())
+    end
+  end
+
   describe "preamble" do
     test "concept_scheme" do
       outline = %Skout.Outline{

@@ -56,4 +56,22 @@ defmodule Skout.ExampleData do
              prefixes: %{skos: SKOS}
            )
   def ex_skos(), do: @ex_skos
+
+  @outline_with_circle %Skout.Outline{
+    manifest: @ex_manifest,
+    skos:
+      RDF.Graph.new(
+        [
+          {EX.Foo, RDF.type(), SKOS.Concept},
+          {EX.Bar, RDF.type(), SKOS.Concept},
+          {EX.Foo, SKOS.prefLabel(), ~L"Foo"},
+          {EX.Bar, SKOS.prefLabel(), ~L"Bar"},
+          {EX.Foo, SKOS.narrower(), EX.Bar},
+          {EX.Bar, SKOS.narrower(), EX.Foo}
+        ],
+        base_iri: @ex_manifest.base_iri,
+        prefixes: %{skos: SKOS}
+      )
+  }
+  def outline_with_circle(), do: @outline_with_circle
 end
