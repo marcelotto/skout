@@ -11,19 +11,30 @@ defmodule Skout.OutlineTest do
                 %Outline{
                   ex_outline()
                   | skos:
-                      RDF.graph([
-                        {EX.Foo, RDF.type(), SKOS.Concept},
-                        {EX.Foo, SKOS.narrower(), EX.Bar},
-                        {EX.Bar, RDF.type(), SKOS.Concept},
-                        {EX.Bar, SKOS.broader(), EX.Foo}
-                      ])
+                      RDF.graph(
+                        [
+                          {EX.Foo, RDF.type(), SKOS.Concept},
+                          {EX.Foo, SKOS.narrower(), EX.Bar},
+                          {EX.Bar, RDF.type(), SKOS.Concept},
+                          {EX.Bar, SKOS.broader(), EX.Foo}
+                        ],
+                        base_iri: ex_manifest().base_iri,
+                        prefixes: %{skos: SKOS}
+                      )
                 }}
     end
 
     test "with a valid triple with a literal on object position" do
       assert Outline.add(ex_outline(), {iri(EX.Foo), SKOS.prefLabel(), ~L"Foo"}) ==
                {:ok,
-                %Outline{ex_outline() | skos: RDF.graph({EX.Foo, SKOS.prefLabel(), ~L"Foo"})}}
+                %Outline{
+                  ex_outline()
+                  | skos:
+                      RDF.graph({EX.Foo, SKOS.prefLabel(), ~L"Foo"},
+                        base_iri: ex_manifest().base_iri,
+                        prefixes: %{skos: SKOS}
+                      )
+                }}
     end
   end
 end

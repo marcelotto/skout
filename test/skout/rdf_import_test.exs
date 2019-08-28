@@ -46,12 +46,16 @@ defmodule Skout.RDF.ImportTest do
   describe "extraction of concepts and inference" do
     test "with SKOS statements only" do
       expected_skos =
-        Graph.new([
-          {EX.Foo, RDF.type(), SKOS.Concept},
-          {EX.Bar, RDF.type(), SKOS.Concept},
-          {EX.Foo, SKOS.narrower(), EX.Bar},
-          {EX.Bar, SKOS.broader(), EX.Foo}
-        ])
+        Graph.new(
+          [
+            {EX.Foo, RDF.type(), SKOS.Concept},
+            {EX.Bar, RDF.type(), SKOS.Concept},
+            {EX.Foo, SKOS.narrower(), EX.Bar},
+            {EX.Bar, SKOS.broader(), EX.Foo}
+          ],
+          base_iri: ex_manifest().base_iri,
+          prefixes: %{skos: SKOS}
+        )
 
       assert {:ok, outline} = Graph.new({EX.Foo, SKOS.narrower(), EX.Bar}) |> call()
       assert outline.skos == expected_skos

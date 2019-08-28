@@ -51,7 +51,9 @@ defmodule Skout.ExampleData do
                {EX.qux(), SKOS.narrower(), EX.quux()},
                {EX.quux(), SKOS.broader(), EX.qux()}
              ] ++
-               @ex_concept_scheme_statements
+               @ex_concept_scheme_statements,
+             base_iri: @ex_manifest.base_iri,
+             prefixes: %{skos: SKOS}
            )
   def ex_skos(), do: @ex_skos
 end

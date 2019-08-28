@@ -27,7 +27,11 @@ defmodule Skout.YAML.DecoderTest do
              {:ok,
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
-                skos: RDF.Graph.new(ex_concept_scheme_statements())
+                skos:
+                  RDF.Graph.new(ex_concept_scheme_statements(),
+                    base_iri: ex_manifest().base_iri,
+                    prefixes: %{skos: SKOS}
+                  )
               }}
   end
 
