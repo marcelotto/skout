@@ -12,6 +12,14 @@ defmodule Skout.YAML.DecoderTest do
       - quux:
   """
 
+  @example_yaml_outline_without_hyphens """
+  Foo:
+    Bar:
+    baz baz:
+      qux:
+        quux:
+  """
+
   @example_yaml_outline_with_preamble """
   default_language:
   ---
@@ -37,6 +45,15 @@ defmodule Skout.YAML.DecoderTest do
 
   test "simple SKOS outline" do
     assert decode(@example_yaml_outline, base_iri: ex_base_iri()) ==
+             {:ok,
+              %Skout.Outline{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos: ex_skos()
+              }}
+  end
+
+  test "simple SKOS outline without hyphens in the hierarchy" do
+    assert decode(@example_yaml_outline_without_hyphens, base_iri: ex_base_iri()) ==
              {:ok,
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),

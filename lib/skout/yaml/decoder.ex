@@ -89,38 +89,54 @@ defmodule Skout.YAML.Decoder do
 
   defp build_skos(outline, map, opts) do
     Enum.reduce_while(map, {:ok, outline}, fn
-      {label, narrower_labels}, {:ok, outline} ->
-        Enum.reduce_while(narrower_labels, {:ok, outline}, fn
+      {label, narrowers}, {:ok, outline} ->
+        Enum.reduce_while(narrowers, {:ok, outline}, fn
           hierarchy, {:ok, outline} when is_map(hierarchy) ->
-            [{narrower_label, next_level}] = Map.to_list(hierarchy)
-
-            with {:ok, outline} <-
-                   Outline.add(outline, label_statement(label, outline.manifest)),
-                 {:ok, outline} <-
-                   Outline.add(outline, label_statement(narrower_label, outline.manifest)),
-                 {:ok, outline} <-
-                   Outline.add(
-                     outline,
-                     narrower_statement(label, narrower_label, outline.manifest)
-                   ) do
-              if next_level do
-                build_skos(outline, hierarchy, opts)
-              else
-                {:ok, outline}
-              end
-            end
+            add(outline, label, hierarchy, opts)
             |> cont_or_halt()
 
-          narrower_label, {:ok, outline} ->
-            with {:ok, outline} <-
-                   Outline.add(outline, label_statement(narrower_label, outline.manifest)) do
-              outline
-              |> Outline.add(narrower_statement(label, narrower_label, outline.manifest))
-            end
+          {narrower, nil}, {:ok, outline} ->
+            add(outline, label, narrower, opts)
+            |> cont_or_halt()
+
+          {narrower, hierarchy}, {:ok, outline} ->
+            add(outline, label, narrower, hierarchy, opts)
+            |> cont_or_halt()
+
+          narrower, {:ok, outline} ->
+            add(outline, label, narrower, opts)
             |> cont_or_halt()
         end)
         |> cont_or_halt()
     end)
+  end
+
+  defp add(outline, broader, narrower, %{} = hierarchy, opts) do
+    with {:ok, outline} <- add(outline, broader, narrower, opts) do
+      build_skos(outline, %{narrower => hierarchy}, opts)
+    end
+  end
+
+  defp add(outline, broader, %{} = hierarchy, opts) do
+    case Map.to_list(hierarchy) do
+      [{narrower, nil}] ->
+        add(outline, broader, narrower, opts)
+
+      [{narrower, _}] ->
+        with {:ok, outline} <- add(outline, broader, narrower, opts) do
+          build_skos(outline, hierarchy, opts)
+        end
+    end
+  end
+
+  defp add(outline, broader, narrower, _) do
+    with {:ok, outline} <-
+           Outline.add(outline, label_statement(broader, outline.manifest)),
+         {:ok, outline} <-
+           Outline.add(outline, label_statement(narrower, outline.manifest)) do
+      outline
+      |> Outline.add(narrower_statement(broader, narrower, outline.manifest))
+    end
   end
 
   defp concept_scheme_statements(false), do: []
