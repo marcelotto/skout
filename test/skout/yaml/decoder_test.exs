@@ -4,32 +4,6 @@ defmodule Skout.YAML.DecoderTest do
 
   import Skout.YAML.Decoder, only: [decode: 1, decode: 2]
 
-  @example_yaml_outline """
-  Foo:
-  - Bar
-  - baz baz:
-    - qux:
-      - quux:
-  """
-
-  @example_yaml_outline_without_hyphens """
-  Foo:
-    Bar:
-    baz baz:
-      qux:
-        quux:
-  """
-
-  @example_yaml_outline_with_preamble """
-  default_language:
-  ---
-  Foo:
-  - Bar
-  - baz baz:
-    - qux:
-      - quux
-  """
-
   test "empty SKOS outline" do
     assert decode("", base_iri: ex_base_iri()) ==
              {:ok,
@@ -44,7 +18,16 @@ defmodule Skout.YAML.DecoderTest do
   end
 
   test "simple SKOS outline" do
-    assert decode(@example_yaml_outline, base_iri: ex_base_iri()) ==
+    assert decode(
+             """
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux:
+             """,
+             base_iri: ex_base_iri()
+           ) ==
              {:ok,
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
@@ -53,7 +36,16 @@ defmodule Skout.YAML.DecoderTest do
   end
 
   test "simple SKOS outline without hyphens in the hierarchy" do
-    assert decode(@example_yaml_outline_without_hyphens, base_iri: ex_base_iri()) ==
+    assert decode(
+             """
+             Foo:
+               Bar:
+               baz baz:
+                 qux:
+                   quux:
+             """,
+             base_iri: ex_base_iri()
+           ) ==
              {:ok,
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
@@ -62,7 +54,18 @@ defmodule Skout.YAML.DecoderTest do
   end
 
   test "simple SKOS outline with preamble" do
-    assert decode(@example_yaml_outline_with_preamble, base_iri: ex_base_iri()) ==
+    assert decode(
+             """
+             default_language:
+             ---
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux
+             """,
+             base_iri: ex_base_iri()
+           ) ==
              {:ok,
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
