@@ -13,8 +13,20 @@ defmodule Skout.Helper do
       {:ok, outline} ->
         {:cont, {:ok, outline}}
 
+      {:ok, _, outline} ->
+        {:cont, {:ok, outline}}
+
       {:error, error} ->
         {:halt, {:error, error}}
     end
+  end
+
+  def properties(mod) do
+    :functions
+    |> mod.__info__()
+    |> Enum.filter(fn {fun, arity} ->
+      arity == 0 and not (fun |> to_string() |> String.starts_with?("_"))
+    end)
+    |> Enum.map(fn {fun, _} -> fun end)
   end
 end

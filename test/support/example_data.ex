@@ -1,5 +1,6 @@
 defmodule Skout.ExampleData do
   alias RDF.NS.SKOS
+  alias RDF.Graph
   alias Skout.Test.Case.EX
 
   import RDF.Sigils
@@ -19,7 +20,7 @@ defmodule Skout.ExampleData do
   ]
   def ex_concept_scheme_statements(), do: @ex_concept_scheme_statements
 
-  @ex_skos RDF.Graph.new(
+  @ex_skos Graph.new(
              [
                # Concepts
                {EX.Foo, RDF.type(), SKOS.Concept},
@@ -56,6 +57,7 @@ defmodule Skout.ExampleData do
              prefixes: %{skos: SKOS}
            )
   def ex_skos(), do: @ex_skos
+  def ex_skos(additions), do: ex_skos() |> Graph.add(additions)
 
   @outline_with_circle %Skout.Outline{
     manifest: @ex_manifest,

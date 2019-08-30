@@ -6,8 +6,8 @@ defmodule Skout.Manifest do
             # This just serves as a cache to not have query the graph for this all the time
             concept_scheme: nil
 
-  alias Skout.Materialization
-  alias RDF.Literal
+  alias Skout.{Materialization, IriBuilder}
+  alias RDF.{IRI, Literal}
 
   import Skout.Helper
 
@@ -69,4 +69,37 @@ defmodule Skout.Manifest do
       Literal.new(label)
     end
   end
+
+  def object_term(%IRI{} = literal, _, _), do: {:ok, literal}
+  def object_term(%Literal{} = literal, _, _), do: {:ok, literal}
+
+  def object_term(object, _, _) when is_boolean(object), do: {:ok, RDF.boolean(object)}
+  def object_term(object, _, _) when is_number(object), do: {:ok, RDF.literal(object)}
+
+  def object_term("<" <> iri_string, _, _) do
+    iri =
+      iri_string
+      |> String.slice(0..-2)
+      |> RDF.iri()
+
+    if IRI.valid?(iri) do
+      {:ok, iri}
+    else
+      {:error, "Invalid IRI: <#{iri_string}"}
+    end
+  end
+
+  def object_term(":" <> concept, _, %__MODULE__{} = manifest) do
+    {:ok, IriBuilder.from_label(concept, manifest)}
+  end
+
+  @props_with_range_concept Materialization.semantic_relations() ++
+                              Materialization.props_with_range_concept()
+
+  def object_term(concept, property, manifest)
+      when is_binary(concept) and property in @props_with_range_concept do
+    {:ok, IriBuilder.from_label(concept, manifest)}
+  end
+
+  def object_term(string, _, _) when is_binary(string), do: {:ok, RDF.string(string)}
 end

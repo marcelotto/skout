@@ -89,53 +89,94 @@ defmodule Skout.YAML.Decoder do
 
   defp build_skos(outline, map, opts) do
     Enum.reduce_while(map, {:ok, outline}, fn
-      {label, narrowers}, {:ok, outline} ->
-        Enum.reduce_while(narrowers, {:ok, outline}, fn
+      {concept, children}, {:ok, outline} ->
+        Enum.reduce_while(children, {:ok, outline}, fn
           hierarchy, {:ok, outline} when is_map(hierarchy) ->
-            add(outline, label, hierarchy, opts)
+            add_concept(outline, concept, hierarchy, opts)
             |> cont_or_halt()
 
-          {narrower, nil}, {:ok, outline} ->
-            add(outline, label, narrower, opts)
+          {child, nil}, {:ok, outline} ->
+            add_concept(outline, concept, child, opts)
             |> cont_or_halt()
 
-          {narrower, hierarchy}, {:ok, outline} ->
-            add(outline, label, narrower, hierarchy, opts)
+          {child, hierarchy}, {:ok, outline} ->
+            add_concept(outline, concept, child, hierarchy, opts)
             |> cont_or_halt()
 
-          narrower, {:ok, outline} ->
-            add(outline, label, narrower, opts)
+          child, {:ok, outline} ->
+            add_concept(outline, concept, child, opts)
             |> cont_or_halt()
         end)
         |> cont_or_halt()
     end)
   end
 
-  defp add(outline, broader, narrower, %{} = hierarchy, opts) do
-    with {:ok, outline} <- add(outline, broader, narrower, opts) do
-      build_skos(outline, %{narrower => hierarchy}, opts)
-    end
+  defp add_concept(outline, concept, child, %{} = hierarchy, opts) do
+    add_concept(outline, concept, %{child => hierarchy}, opts)
   end
 
-  defp add(outline, broader, %{} = hierarchy, opts) do
+  defp add_concept(outline, concept, %{} = hierarchy, opts) do
     case Map.to_list(hierarchy) do
-      [{narrower, nil}] ->
-        add(outline, broader, narrower, opts)
+      [{child, nil}] ->
+        add_concept(outline, concept, child, opts)
 
-      [{narrower, _}] ->
-        with {:ok, outline} <- add(outline, broader, narrower, opts) do
-          build_skos(outline, hierarchy, opts)
+      [{child, _}] ->
+        case add_concept(outline, concept, child, opts) do
+          {:ok, :hierarchy, outline} ->
+            build_skos(outline, hierarchy, opts)
+
+          {:ok, :description, outline} ->
+            add_description(outline, concept, hierarchy, opts)
+
+          {:error, _} = error ->
+            error
         end
     end
   end
 
-  defp add(outline, broader, narrower, _) do
+  defp add_concept(outline, concept, ":" <> _, _) do
     with {:ok, outline} <-
-           Outline.add(outline, label_statement(broader, outline.manifest)),
+           Outline.add(outline, label_statement(concept, outline.manifest)) do
+      {:ok, :description, outline}
+    end
+  end
+
+  defp add_concept(outline, concept, narrower, _) do
+    with {:ok, outline} <-
+           Outline.add(outline, label_statement(concept, outline.manifest)),
          {:ok, outline} <-
-           Outline.add(outline, label_statement(narrower, outline.manifest)) do
-      outline
-      |> Outline.add(narrower_statement(broader, narrower, outline.manifest))
+           Outline.add(outline, label_statement(narrower, outline.manifest)),
+         {:ok, outline} <-
+           Outline.add(outline, narrower_statement(concept, narrower, outline.manifest)) do
+      {:ok, :hierarchy, outline}
+    end
+  end
+
+  defp add_description(outline, concept, description, _opts) do
+    Enum.reduce_while(description, {:ok, outline}, fn
+      {":" <> property, objects}, outline ->
+        objects
+        |> List.wrap()
+        |> Enum.reduce_while(outline, fn object, {:ok, outline} ->
+          with {:ok, statement} <-
+                 generic_statement(concept, property, object, outline.manifest) do
+            Outline.add(outline, statement)
+          end
+          |> cont_or_halt()
+        end)
+        |> cont_or_halt()
+    end)
+  end
+
+  defp generic_statement(subject, predicate, object, manifest) do
+    with {:ok, predicate_iri} <- IriBuilder.predicate(predicate, manifest),
+         {:ok, object_term} <- Manifest.object_term(object, predicate_iri, manifest) do
+      {:ok,
+       {
+         IriBuilder.from_label(subject, manifest),
+         predicate_iri,
+         object_term
+       }}
     end
   end
 

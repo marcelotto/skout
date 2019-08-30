@@ -38,5 +38,33 @@ defmodule Skout.IriBuilderTest do
                  iri(iri)
       end)
     end
+
+  describe "predicate_to_iri/2" do
+    test "with IRI" do
+      assert IriBuilder.predicate(SKOS.broader(), ex_manifest()) == {:ok, SKOS.broader()}
+    end
+
+    test "with known property" do
+      assert IriBuilder.predicate("broader", ex_manifest()) == {:ok, SKOS.broader()}
+      assert IriBuilder.predicate("narrower", ex_manifest()) == {:ok, SKOS.narrower()}
+      assert IriBuilder.predicate("related", ex_manifest()) == {:ok, SKOS.related()}
+      assert IriBuilder.predicate("sameAs", ex_manifest()) == {:ok, RDF.NS.OWL.sameAs()}
+
+      assert IriBuilder.predicate("isDefinedBy", ex_manifest()) ==
+               {:ok, RDF.NS.RDFS.isDefinedBy()}
+
+      assert IriBuilder.predicate("seeAlso", ex_manifest()) == {:ok, RDF.NS.RDFS.seeAlso()}
+
+      assert IriBuilder.predicate("title", ex_manifest()) ==
+               {:ok, ~I<http://purl.org/dc/terms/title>}
+
+      assert IriBuilder.predicate("creator", ex_manifest()) ==
+               {:ok, ~I<http://purl.org/dc/terms/creator>}
+    end
+
+    test "with unknown property" do
+      assert IriBuilder.predicate("unknown", ex_manifest()) ==
+               {:error, "Unknown property 'unknown'"}
+    end
   end
 end

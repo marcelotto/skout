@@ -21,6 +21,8 @@ defmodule Skout.Materialization do
     SKOS.semanticRelation()
   ]
 
+  def semantic_relations(), do: @semantic_relations
+
   @props_with_domain_concept [
     SKOS.topConceptOf()
   ]
@@ -29,6 +31,8 @@ defmodule Skout.Materialization do
     SKOS.hasTopConcept(),
     SKOS.member()
   ]
+
+  def props_with_range_concept(), do: @props_with_range_concept
 
   def infer(triple, manifest) do
     do_infer(triple, manifest.materialization, manifest)

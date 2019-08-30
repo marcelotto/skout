@@ -11,7 +11,7 @@ defmodule Skout.Test.Case do
   using do
     quote do
       alias RDF.{Graph, Description, IRI}
-      alias RDF.NS.SKOS
+      alias RDF.NS.{SKOS, RDFS, OWL}
       alias unquote(__MODULE__).EX
 
       import RDF, only: [iri: 1, literal: 1]

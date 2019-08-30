@@ -1,6 +1,9 @@
 defmodule Skout.IriBuilder do
   alias Skout.Manifest
+  alias RDF.NS.{SKOS, RDFS, OWL}
   alias RDF.IRI
+
+  import RDF.Sigils
 
   def from_label(%IRI{} = iri, _), do: iri
 
@@ -37,5 +40,30 @@ defmodule Skout.IriBuilder do
 
   defp camelize_list([h | tail]) do
     [String.capitalize(h)] ++ camelize_list(tail)
+  end
+
+  def predicate(%IRI{} = iri, _), do: {:ok, iri}
+
+  SKOS
+  |> Skout.Helper.properties()
+  |> Enum.each(fn property ->
+    def predicate(unquote(to_string(property)), _),
+      do: {:ok, unquote(Macro.escape(apply(SKOS, property, [])))}
+  end)
+
+  %{
+    sameAs: OWL.sameAs(),
+    isDefinedBy: RDFS.isDefinedBy(),
+    seeAlso: RDFS.seeAlso(),
+    title: ~I<http://purl.org/dc/terms/title>,
+    creator: ~I<http://purl.org/dc/terms/creator>
+  }
+  |> Enum.each(fn {property, iri} ->
+    def predicate(unquote(to_string(property)), _),
+      do: {:ok, unquote(Macro.escape(iri))}
+  end)
+
+  def predicate(term, %Manifest{} = _manifest) do
+    {:error, "Unknown property '#{term}'"}
   end
 end

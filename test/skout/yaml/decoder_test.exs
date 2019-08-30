@@ -73,6 +73,124 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
+  test "SKOS outline with concept description with known properties" do
+    assert decode(
+             """
+             Foo:
+             - :related: other Foo
+             - :altLabel: AltFoo
+             - Bar:
+               - :related:
+                 - other Bar
+             - baz baz:
+               - qux:
+                 - quux:
+                   - :related: other quux
+                 - :related:
+                   - other qux
+                   - yet another qux
+               - :related: other baz
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Outline{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos:
+                  ex_skos([
+                    {EX.otherFoo(), RDF.type(), SKOS.Concept},
+                    {EX.otherBar(), RDF.type(), SKOS.Concept},
+                    {EX.otherBaz(), RDF.type(), SKOS.Concept},
+                    {EX.otherQux(), RDF.type(), SKOS.Concept},
+                    {EX.yetAnotherQux(), RDF.type(), SKOS.Concept},
+                    {EX.otherQuux(), RDF.type(), SKOS.Concept},
+                    {EX.quux(), RDF.type(), SKOS.Concept},
+                    {EX.otherFoo(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.otherBar(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.otherBaz(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.otherQux(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.yetAnotherQux(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.otherQuux(), SKOS.inScheme(), ex_base_iri()},
+                    {EX.otherFoo(), SKOS.topConceptOf(), ex_base_iri()},
+                    {EX.otherBar(), SKOS.topConceptOf(), ex_base_iri()},
+                    {EX.otherBaz(), SKOS.topConceptOf(), ex_base_iri()},
+                    {EX.otherQux(), SKOS.topConceptOf(), ex_base_iri()},
+                    {EX.yetAnotherQux(), SKOS.topConceptOf(), ex_base_iri()},
+                    {EX.otherQuux(), SKOS.topConceptOf(), ex_base_iri()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.otherFoo()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.otherBar()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.otherBaz()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.otherQux()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.yetAnotherQux()},
+                    {ex_base_iri(), SKOS.hasTopConcept(), EX.otherQuux()},
+                    {EX.otherQuux(), RDF.type(), SKOS.Concept},
+                    {EX.Foo, SKOS.altLabel(), ~L"AltFoo"},
+                    {EX.Foo, SKOS.related(), EX.otherFoo()},
+                    {EX.otherFoo(), SKOS.related(), EX.Foo},
+                    {EX.Bar, SKOS.related(), EX.otherBar()},
+                    {EX.otherBar(), SKOS.related(), EX.Bar},
+                    {EX.bazBaz(), SKOS.related(), EX.otherBaz()},
+                    {EX.otherBaz(), SKOS.related(), EX.bazBaz()},
+                    {EX.quux(), SKOS.related(), EX.otherQuux()},
+                    {EX.otherQuux(), SKOS.related(), EX.quux()},
+                    {EX.qux(), SKOS.related(), EX.otherQux()},
+                    {EX.otherQux(), SKOS.related(), EX.qux()},
+                    {EX.qux(), SKOS.related(), EX.yetAnotherQux()},
+                    {EX.yetAnotherQux(), SKOS.related(), EX.qux()}
+                  ])
+              }}
+  end
+
+  test "concept description with known properties" do
+    assert decode(
+             """
+             Foo:
+             - :definition: A foo is a ...
+             - :notation: [42, true]
+             - :related: Bar
+             - :seeAlso:
+               - <http://example.com/other/Foo>
+               - <http://example.com/other/Bar>
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Outline{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos:
+                  EX.Foo
+                  |> RDF.type(SKOS.Concept)
+                  |> SKOS.prefLabel(~L"Foo")
+                  |> SKOS.definition(~L"A foo is a ...")
+                  |> SKOS.related(EX.Bar)
+                  |> SKOS.notation(RDF.true(), RDF.integer(42))
+                  |> RDFS.seeAlso(
+                    ~I<http://example.com/other/Foo>,
+                    ~I<http://example.com/other/Bar>
+                  )
+                  |> SKOS.inScheme(ex_base_iri())
+                  |> SKOS.topConceptOf(ex_base_iri())
+                  |> Graph.new(
+                    base_iri: ex_manifest().base_iri,
+                    prefixes: %{skos: SKOS}
+                  )
+                  |> Graph.add(
+                    EX.Bar
+                    |> RDF.type(SKOS.Concept)
+                    #                       |> SKOS.prefLabel(~L"Bar")
+                    |> SKOS.inScheme(ex_base_iri())
+                    |> SKOS.topConceptOf(ex_base_iri())
+                    |> SKOS.related(EX.Foo)
+                  )
+                  |> Graph.add(ex_concept_scheme_statements())
+                  |> Graph.add(
+                    ex_base_iri()
+                    |> RDF.type(SKOS.ConceptScheme)
+                    |> SKOS.hasTopConcept(EX.Foo, EX.Bar)
+                  )
+              }}
+  end
+
   describe "concept scheme" do
     test "without the concept_scheme the base_iri is used" do
       assert {:ok, outline} = decode("", base_iri: ex_base_iri())
