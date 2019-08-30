@@ -53,8 +53,7 @@ defmodule Skout.ExampleData do
                {EX.quux(), SKOS.broader(), EX.qux()}
              ] ++
                @ex_concept_scheme_statements,
-             base_iri: @ex_manifest.base_iri,
-             prefixes: %{skos: SKOS}
+             prefixes: %{"" => @ex_manifest.base_iri, skos: SKOS}
            )
   def ex_skos(), do: @ex_skos
   def ex_skos(additions), do: ex_skos() |> Graph.add(additions)
@@ -71,8 +70,7 @@ defmodule Skout.ExampleData do
           {EX.Foo, SKOS.narrower(), EX.Bar},
           {EX.Bar, SKOS.narrower(), EX.Foo}
         ],
-        base_iri: @ex_manifest.base_iri,
-        prefixes: %{skos: SKOS}
+        prefixes: %{"" => @ex_manifest.base_iri, skos: SKOS}
       )
   }
   def outline_with_circle(), do: @outline_with_circle

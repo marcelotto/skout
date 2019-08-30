@@ -14,8 +14,10 @@ defmodule Skout.Outline do
          manifest: manifest,
          skos:
            Graph.new(
-             base_iri: manifest.base_iri,
-             prefixes: %{skos: SKOS}
+             prefixes: %{
+               "" => manifest.base_iri,
+               skos: SKOS
+             }
            )
        }}
     end
