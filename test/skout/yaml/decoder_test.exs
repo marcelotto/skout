@@ -76,6 +76,7 @@ defmodule Skout.YAML.DecoderTest do
     assert decode(
              """
              Foo:
+             - :a: <http://example.com/vocab/Class>
              - :related: other Foo
              - :altLabel: AltFoo
              - Bar:
@@ -97,6 +98,7 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   ex_skos([
+                    {EX.Foo, RDF.type(), ~I<http://example.com/vocab/Class>},
                     {EX.otherFoo(), RDF.type(), SKOS.Concept},
                     {EX.otherBar(), RDF.type(), SKOS.Concept},
                     {EX.otherBaz(), RDF.type(), SKOS.Concept},
@@ -144,6 +146,8 @@ defmodule Skout.YAML.DecoderTest do
     assert decode(
              """
              Foo:
+             - :a: <http://example.com/vocab/Class>
+             - :subClassOf: <http://example.com/vocab/OtherClass>
              - :definition: A foo is a ...
              - :notation: [42, true]
              - :related: Bar
@@ -158,7 +162,8 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   EX.Foo
-                  |> RDF.type(SKOS.Concept)
+                  |> RDF.type(SKOS.Concept, ~I<http://example.com/vocab/Class>)
+                  |> RDFS.subClassOf(~I<http://example.com/vocab/OtherClass>)
                   |> SKOS.prefLabel(~L"Foo")
                   |> SKOS.definition(~L"A foo is a ...")
                   |> SKOS.related(EX.Bar)

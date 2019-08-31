@@ -48,12 +48,12 @@ defmodule Skout.IriBuilderTest do
       assert IriBuilder.predicate("broader", ex_manifest()) == {:ok, SKOS.broader()}
       assert IriBuilder.predicate("narrower", ex_manifest()) == {:ok, SKOS.narrower()}
       assert IriBuilder.predicate("related", ex_manifest()) == {:ok, SKOS.related()}
-      assert IriBuilder.predicate("sameAs", ex_manifest()) == {:ok, RDF.NS.OWL.sameAs()}
+      assert IriBuilder.predicate("a", ex_manifest()) == {:ok, RDF.type()}
+      assert IriBuilder.predicate("subClassOf", ex_manifest()) == {:ok, RDF.NS.RDFS.subClassOf()}
+      assert IriBuilder.predicate("seeAlso", ex_manifest()) == {:ok, RDF.NS.RDFS.seeAlso()}
 
       assert IriBuilder.predicate("isDefinedBy", ex_manifest()) ==
                {:ok, RDF.NS.RDFS.isDefinedBy()}
-
-      assert IriBuilder.predicate("seeAlso", ex_manifest()) == {:ok, RDF.NS.RDFS.seeAlso()}
 
       assert IriBuilder.predicate("title", ex_manifest()) ==
                {:ok, ~I<http://purl.org/dc/terms/title>}

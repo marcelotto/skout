@@ -1,6 +1,6 @@
 defmodule Skout.IriBuilder do
   alias Skout.Manifest
-  alias RDF.NS.{SKOS, RDFS, OWL}
+  alias RDF.NS.{SKOS, RDFS}
   alias RDF.IRI
 
   import RDF.Sigils
@@ -52,7 +52,8 @@ defmodule Skout.IriBuilder do
   end)
 
   %{
-    sameAs: OWL.sameAs(),
+    a: RDF.type(),
+    subClassOf: RDFS.subClassOf(),
     isDefinedBy: RDFS.isDefinedBy(),
     seeAlso: RDFS.seeAlso(),
     title: ~I<http://purl.org/dc/terms/title>,
