@@ -54,28 +54,14 @@ defmodule Skout.YAML.Encoder do
 
     label <>
       ":\n" <>
-      (concept
-       |> narrower_concepts(outline.skos)
+      (description
+       |> Description.get(SKOS.narrower(), [])
        |> MapSet.new()
        |> concepts(outline, depth + 1, MapSet.put(visited, concept), opts)
        |> case do
          "" -> ""
          next_level -> indentation(depth + 1) <> next_level
        end)
-  end
-
-  defp narrower_concepts(concept, graph) do
-    graph
-    |> SPARQL.execute_query(
-      """
-      SELECT ?concept WHERE {
-        <#{concept}> skos:narrower ?concept .
-      }
-      """,
-      default_prefixes: %{skos: SKOS}
-    )
-    |> SPARQL.Query.Result.get(:concept)
-    |> List.wrap()
   end
 
   defp indentation(0), do: ""
