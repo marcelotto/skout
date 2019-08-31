@@ -5,6 +5,20 @@ defmodule Skout.IriBuilder do
 
   import RDF.Sigils
 
+  @known_properties SKOS
+                    |> Skout.Helper.properties()
+                    |> Enum.map(fn property -> {property, apply(SKOS, property, [])} end)
+                    |> Map.new()
+                    |> Map.merge(%{
+                      a: RDF.type(),
+                      subClassOf: RDFS.subClassOf(),
+                      isDefinedBy: RDFS.isDefinedBy(),
+                      seeAlso: RDFS.seeAlso(),
+                      title: ~I<http://purl.org/dc/terms/title>,
+                      creator: ~I<http://purl.org/dc/terms/creator>
+                    })
+  def known_properties(), do: @known_properties
+
   def from_label(%IRI{} = iri, _), do: iri
 
   def from_label(label, %Manifest{} = manifest) do
@@ -44,22 +58,7 @@ defmodule Skout.IriBuilder do
 
   def predicate(%IRI{} = iri, _), do: {:ok, iri}
 
-  SKOS
-  |> Skout.Helper.properties()
-  |> Enum.each(fn property ->
-    def predicate(unquote(to_string(property)), _),
-      do: {:ok, unquote(Macro.escape(apply(SKOS, property, [])))}
-  end)
-
-  %{
-    a: RDF.type(),
-    subClassOf: RDFS.subClassOf(),
-    isDefinedBy: RDFS.isDefinedBy(),
-    seeAlso: RDFS.seeAlso(),
-    title: ~I<http://purl.org/dc/terms/title>,
-    creator: ~I<http://purl.org/dc/terms/creator>
-  }
-  |> Enum.each(fn {property, iri} ->
+  Enum.each(@known_properties, fn {property, iri} ->
     def predicate(unquote(to_string(property)), _),
       do: {:ok, unquote(Macro.escape(iri))}
   end)
