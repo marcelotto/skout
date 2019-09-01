@@ -45,8 +45,8 @@ defmodule Skout.IriBuilderTest do
     end
 
     test "with known property" do
-      assert IriBuilder.predicate("broader", ex_manifest()) == {:ok, SKOS.broader()}
-      assert IriBuilder.predicate("narrower", ex_manifest()) == {:ok, SKOS.narrower()}
+      assert IriBuilder.predicate("notation", ex_manifest()) == {:ok, SKOS.notation()}
+      assert IriBuilder.predicate("definition", ex_manifest()) == {:ok, SKOS.definition()}
       assert IriBuilder.predicate("related", ex_manifest()) == {:ok, SKOS.related()}
       assert IriBuilder.predicate("a", ex_manifest()) == {:ok, RDF.type()}
       assert IriBuilder.predicate("subClassOf", ex_manifest()) == {:ok, RDF.NS.RDFS.subClassOf()}

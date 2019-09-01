@@ -5,8 +5,17 @@ defmodule Skout.IriBuilder do
 
   import RDF.Sigils
 
-  @known_properties SKOS
-                    |> Skout.Helper.properties()
+  @known_properties (Skout.Helper.properties(SKOS) --
+                       [
+                         :prefLabel,
+                         :broader,
+                         :narrowerTransitive,
+                         :broaderTransitive,
+                         :semanticRelation,
+                         :inScheme,
+                         :hasTopConcept,
+                         :topConceptOf
+                       ])
                     |> Enum.map(fn property -> {property, apply(SKOS, property, [])} end)
                     |> Map.new()
                     |> Map.merge(%{
