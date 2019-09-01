@@ -41,6 +41,52 @@ defmodule Skout.YAML.EncoderTest do
               """}
   end
 
+  test "SKOS outline with descriptions" do
+    assert encode(
+             @example_outline
+             |> Skout.Outline.update_graph(fn skos ->
+               skos
+               |> Graph.add([
+                 {EX.Foo, SKOS.related(), EX.qux()},
+                 {EX.qux(), SKOS.related(), EX.Foo}
+               ])
+               |> Graph.add(
+                 EX.Foo
+                 |> SKOS.altLabel(42, 3.14, true, false)
+               )
+               |> Graph.add(
+                 EX.Bar
+                 |> RDF.type(EX.Type, EX.Foo)
+                 |> RDFS.seeAlso(
+                   ~I<http://example.com/other/Bar>,
+                   ~I<http://example.com/another/Bar>,
+                   ~I<http://example.com/yet_another/Bar>
+                 )
+               )
+             end)
+           ) ==
+             {:ok,
+              """
+              base_iri: #{@example_outline.manifest.base_iri}
+              iri_normalization: #{@example_outline.manifest.iri_normalization}
+              ---
+              Foo:
+              - :altLabel: [false, true, 3.14, 42]
+              - :related: qux
+              - Bar:
+                - :a: [:Foo, <http://example.com/Type>]
+                - :seeAlso:
+                  - <http://example.com/another/Bar>
+                  - <http://example.com/other/Bar>
+                  - <http://example.com/yet_another/Bar>
+              - baz baz:
+                - qux:
+                  - :related: Foo
+                  - quux:
+
+              """}
+  end
+
   test "SKOS outline with circles" do
     assert_raise RuntimeError, ~r/concept scheme contains a circle/, fn ->
       encode(outline_with_circle())
