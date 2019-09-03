@@ -1,6 +1,7 @@
 defmodule Skout.YAML.Encoder do
   alias Skout.{Outline, IriBuilder, Materialization}
   alias RDF.NS.{SKOS, RDFS}
+  alias Skout.NS.DC
   alias RDF.{Graph, Description, IRI, Literal}
 
   import RDF.Sigils
@@ -21,7 +22,7 @@ defmodule Skout.YAML.Encoder do
     SKOS.historyNote(),
     SKOS.note(),
     SKOS.editorialNote(),
-    ~I<http://purl.org/dc/terms/creator>,
+    DC.creator(),
     RDFS.isDefinedBy(),
     RDFS.seeAlso(),
     # Collections

@@ -1,5 +1,6 @@
 defmodule Skout.IriBuilder do
   alias Skout.Manifest
+  alias Skout.NS.DC
   alias RDF.NS.{SKOS, RDFS}
   alias RDF.IRI
 
@@ -23,8 +24,8 @@ defmodule Skout.IriBuilder do
                       subClassOf: RDFS.subClassOf(),
                       isDefinedBy: RDFS.isDefinedBy(),
                       seeAlso: RDFS.seeAlso(),
-                      title: ~I<http://purl.org/dc/terms/title>,
-                      creator: ~I<http://purl.org/dc/terms/creator>
+                      title: DC.title(),
+                      creator: DC.creator()
                     })
   def known_properties(), do: @known_properties
 

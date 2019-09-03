@@ -49,17 +49,11 @@ defmodule Skout.IriBuilderTest do
       assert IriBuilder.predicate("definition", ex_manifest()) == {:ok, SKOS.definition()}
       assert IriBuilder.predicate("related", ex_manifest()) == {:ok, SKOS.related()}
       assert IriBuilder.predicate("a", ex_manifest()) == {:ok, RDF.type()}
-      assert IriBuilder.predicate("subClassOf", ex_manifest()) == {:ok, RDF.NS.RDFS.subClassOf()}
-      assert IriBuilder.predicate("seeAlso", ex_manifest()) == {:ok, RDF.NS.RDFS.seeAlso()}
-
-      assert IriBuilder.predicate("isDefinedBy", ex_manifest()) ==
-               {:ok, RDF.NS.RDFS.isDefinedBy()}
-
-      assert IriBuilder.predicate("title", ex_manifest()) ==
-               {:ok, ~I<http://purl.org/dc/terms/title>}
-
-      assert IriBuilder.predicate("creator", ex_manifest()) ==
-               {:ok, ~I<http://purl.org/dc/terms/creator>}
+      assert IriBuilder.predicate("subClassOf", ex_manifest()) == {:ok, RDFS.subClassOf()}
+      assert IriBuilder.predicate("seeAlso", ex_manifest()) == {:ok, RDFS.seeAlso()}
+      assert IriBuilder.predicate("isDefinedBy", ex_manifest()) == {:ok, RDFS.isDefinedBy()}
+      assert IriBuilder.predicate("title", ex_manifest()) == {:ok, DC.title()}
+      assert IriBuilder.predicate("creator", ex_manifest()) == {:ok, DC.creator()}
     end
 
     test "with unknown property" do
