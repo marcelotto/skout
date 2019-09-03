@@ -4,8 +4,6 @@ defmodule Skout.IriBuilder do
   alias RDF.NS.{SKOS, RDFS}
   alias RDF.IRI
 
-  import RDF.Sigils
-
   @known_properties (Skout.Helper.properties(SKOS) --
                        [
                          :prefLabel,
@@ -25,7 +23,9 @@ defmodule Skout.IriBuilder do
                       isDefinedBy: RDFS.isDefinedBy(),
                       seeAlso: RDFS.seeAlso(),
                       title: DC.title(),
-                      creator: DC.creator()
+                      creator: DC.creator(),
+                      created: DC.created(),
+                      modified: DC.modified()
                     })
   def known_properties(), do: @known_properties
 

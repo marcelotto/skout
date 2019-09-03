@@ -4,8 +4,6 @@ defmodule Skout.YAML.Encoder do
   alias Skout.NS.DC
   alias RDF.{Graph, Description, IRI, Literal}
 
-  import RDF.Sigils
-
   @concept_description_blueprint [
     # Schema
     RDF.type(),
@@ -23,6 +21,8 @@ defmodule Skout.YAML.Encoder do
     SKOS.note(),
     SKOS.editorialNote(),
     DC.creator(),
+    DC.created(),
+    DC.modified(),
     RDFS.isDefinedBy(),
     RDFS.seeAlso(),
     # Collections
