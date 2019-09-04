@@ -18,7 +18,7 @@ defmodule Skout.YAML.Decoder do
             end),
          {:ok, manifest} <- build_manifest(preamble, opts),
          {:ok, outline} <- Outline.new(manifest),
-         {:ok, outline} <- build_concept_scheme(outline, concept_scheme),
+         {:ok, outline} <- build_concept_scheme(outline, concept_scheme, opts),
          {:ok, outline} <- build_skos(outline, body, opts) do
       Outline.finalize(outline)
     end
@@ -65,7 +65,20 @@ defmodule Skout.YAML.Decoder do
     |> Manifest.new()
   end
 
-  defp build_concept_scheme(outline, concept_scheme) do
+  defp build_concept_scheme(outline, concept_scheme_description, opts)
+       when is_map(concept_scheme_description) do
+    case Map.pop(concept_scheme_description, "id", true) do
+      {id, _} when id in [false, nil] ->
+        {:error, "id field with IRI of concept scheme is missing"}
+
+      {id, description} ->
+        with {:ok, outline} <- build_concept_scheme(outline, id, opts) do
+          add_description(outline, outline.manifest.concept_scheme, description, opts)
+        end
+    end
+  end
+
+  defp build_concept_scheme(outline, concept_scheme, _opts) do
     concept_scheme_iri = concept_scheme_iri(concept_scheme, outline.manifest)
 
     {:ok,
@@ -78,6 +91,9 @@ defmodule Skout.YAML.Decoder do
 
   defp concept_scheme_iri(false, _), do: false
   defp concept_scheme_iri(true, manifest), do: manifest.base_iri
+
+  defp concept_scheme_iri("<" <> concept_scheme, manifest),
+    do: concept_scheme |> String.slice(0..-2) |> concept_scheme_iri(manifest)
 
   defp concept_scheme_iri(concept_scheme, manifest) do
     if IRI.absolute?(concept_scheme) do
@@ -126,7 +142,7 @@ defmodule Skout.YAML.Decoder do
             build_skos(outline, hierarchy, opts)
 
           {:ok, :description, outline} ->
-            add_description(outline, concept, hierarchy, opts)
+            add_hierarchy_embedded_description(outline, concept, hierarchy, opts)
 
           {:error, _} = error ->
             error
@@ -152,19 +168,31 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
-  defp add_description(outline, concept, description, _opts) do
+  defp add_description(outline, concept, description, opts) do
+    Enum.reduce_while(description, {:ok, outline}, fn
+      {property, objects}, outline ->
+        add_description_statements(outline, concept, property, objects, opts)
+        |> cont_or_halt()
+    end)
+  end
+
+  defp add_hierarchy_embedded_description(outline, concept, description, opts) do
     Enum.reduce_while(description, {:ok, outline}, fn
       {":" <> property, objects}, outline ->
-        objects
-        |> List.wrap()
-        |> Enum.reduce_while(outline, fn object, {:ok, outline} ->
-          with {:ok, statement} <-
-                 generic_statement(concept, property, object, outline.manifest) do
-            Outline.add(outline, statement)
-          end
-          |> cont_or_halt()
-        end)
+        add_description_statements(outline, concept, property, objects, opts)
         |> cont_or_halt()
+    end)
+  end
+
+  defp add_description_statements(outline, concept, property, objects, _opts) do
+    objects
+    |> List.wrap()
+    |> Enum.reduce_while(outline, fn object, {:ok, outline} ->
+      with {:ok, statement} <-
+             generic_statement(concept, property, object, outline.manifest) do
+        Outline.add(outline, statement)
+      end
+      |> cont_or_halt()
     end)
   end
 

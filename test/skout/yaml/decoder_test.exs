@@ -210,9 +210,44 @@ defmodule Skout.YAML.DecoderTest do
       assert outline.manifest.concept_scheme == ~I<http://other_example.com>
     end
 
+    test "concept_scheme with iri in angle brackets" do
+      assert {:ok, outline} =
+               decode("concept_scheme: <http://other_example.com>\n---", base_iri: ex_base_iri())
+
+      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
+    end
+
     test "setting the concept scheme to false prevents generating any concept scheme statements" do
       assert {:ok, outline} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
       assert outline.manifest.concept_scheme == false
+    end
+
+    test "concept_scheme with description" do
+      assert """
+             concept_scheme:
+               id: <http://other_example.com>
+               title: An example concept scheme
+               definition: "A description of a concept scheme"
+               creator: John Doe
+               created: 2019
+             ---
+
+             """
+             |> decode(base_iri: ex_base_iri()) ==
+               {:ok,
+                %Skout.Outline{
+                  manifest: ex_manifest(concept_scheme: ~I<http://other_example.com>),
+                  skos:
+                    Graph.new(
+                      ~I<http://other_example.com>
+                      |> RDF.type(SKOS.ConceptScheme)
+                      |> DC.title(~L"An example concept scheme")
+                      |> SKOS.definition(~L"A description of a concept scheme")
+                      |> DC.creator(~L"John Doe")
+                      |> DC.created(RDF.integer(2019)),
+                      prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+                    )
+                }}
     end
   end
 
