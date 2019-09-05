@@ -111,6 +111,54 @@ defmodule Skout.YAML.EncoderTest do
                 """}
     end
 
+    test "suppressed concept_scheme" do
+      outline = %Skout.Outline{
+        manifest: ex_manifest(concept_scheme: false),
+        skos: RDF.Graph.new()
+      }
+
+      assert encode(outline) ==
+               {:ok,
+                """
+                base_iri: #{outline.manifest.base_iri}
+                iri_normalization: #{outline.manifest.iri_normalization}
+                ---
+
+                """}
+    end
+
+    test "concept scheme with descriptions" do
+      outline = %Skout.Outline{
+        manifest: ex_manifest(concept_scheme: "http://example.com/foo#"),
+        skos:
+          RDF.Graph.new(
+            ~I<http://example.com/foo#>
+            |> RDF.type(SKOS.ConceptScheme)
+            |> DC.title(~L"An example concept scheme")
+            |> SKOS.definition(~L"A description of a concept scheme")
+            |> DC.creator(~L"John Doe")
+            |> DC.created(RDF.integer(2019))
+            # This is an unknown property and should be ignored.
+            |> EX.foo(42)
+          )
+      }
+
+      assert encode(outline) ==
+               {:ok,
+                """
+                base_iri: #{outline.manifest.base_iri}
+                concept_scheme:
+                  id: http://example.com/foo#
+                  title: An example concept scheme
+                  creator: John Doe
+                  created: 2019
+                  definition: A description of a concept scheme
+                iri_normalization: #{outline.manifest.iri_normalization}
+                ---
+
+                """}
+    end
+
     test "default_language" do
       outline = %Skout.Outline{
         manifest: ex_manifest(default_language: "en"),

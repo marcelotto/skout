@@ -4,6 +4,30 @@ defmodule Skout.YAML.Encoder do
   alias Skout.NS.DC
   alias RDF.{Graph, Description, IRI, Literal}
 
+  @concept_scheme_description_blueprint [
+    # Schema
+    RDF.type(),
+    RDFS.subClassOf(),
+    # Lexical labels
+    SKOS.altLabel(),
+    SKOS.hiddenLabel(),
+    SKOS.notation(),
+    # Documentation
+    DC.title(),
+    DC.creator(),
+    DC.created(),
+    DC.modified(),
+    SKOS.definition(),
+    SKOS.example(),
+    SKOS.scopeNote(),
+    SKOS.changeNote(),
+    SKOS.historyNote(),
+    SKOS.note(),
+    SKOS.editorialNote(),
+    RDFS.isDefinedBy(),
+    RDFS.seeAlso()
+  ]
+
   @concept_description_blueprint [
     # Schema
     RDF.type(),
@@ -41,15 +65,11 @@ defmodule Skout.YAML.Encoder do
   ]
 
   @known_properties IriBuilder.known_properties()
-                    |> Enum.map(fn
-                      # title is for concept schemes only
-                      {:title, _} -> nil
-                      {property, iri} -> {iri, property}
-                    end)
-                    |> Enum.reject(&is_nil/1)
-                    |> Map.new()
+                    |> Map.new(fn {property, iri} -> {iri, property} end)
 
-  unless @known_properties |> Map.drop(@concept_description_blueprint) |> Enum.empty?() do
+  unless @known_properties
+         |> Map.drop(@concept_description_blueprint ++ [DC.title()])
+         |> Enum.empty?() do
     raise """
     The following known properties are missing in the concept description blueprint:
     - #{
@@ -82,16 +102,64 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  def preamble(outline, _opts) do
+  def preamble(outline, opts) do
     outline.manifest
     |> Map.from_struct()
     |> Enum.reject(fn {key, value} -> is_nil(value) or key in [:materialization] end)
-    |> Enum.map(fn {key, value} ->
-      """
-      #{to_string(key)}: #{value}
-      """
+    |> Enum.map(fn
+      {:concept_scheme, description} ->
+        concept_scheme(outline, description, opts)
+
+      {key, value} ->
+        """
+        #{to_string(key)}: #{value}
+        """
     end)
     |> Enum.join()
+  end
+
+  defp concept_scheme(_, false, _), do: ""
+
+  defp concept_scheme(outline, concept_scheme, opts) do
+    description = concept_scheme_description(outline, concept_scheme)
+
+    if Enum.empty?(description) do
+      """
+      concept_scheme: #{concept_scheme}
+      """
+    else
+      """
+      concept_scheme:
+        id: #{concept_scheme}
+      """ <>
+        Enum.map_join(@concept_scheme_description_blueprint, fn property ->
+          statement(
+            concept_scheme,
+            property,
+            description,
+            outline,
+            1,
+            nil,
+            opts
+            |> Keyword.put(:indent_style, :concept_scheme_description)
+            |> Keyword.put(:property_term_style, :concept_scheme_description)
+          )
+        end)
+    end
+  end
+
+  defp concept_scheme_description(outline, id) do
+    filtered_description(outline, id, @concept_scheme_description_blueprint)
+  end
+
+  defp filtered_description(outline, subject, filtered_properties) do
+    outline.skos
+    |> Graph.get(subject, Description.new(subject))
+    |> Enum.filter(fn {_, predicate, _} -> predicate in filtered_properties end)
+    |> case do
+      [] -> Description.new(subject)
+      triples -> Description.new(triples)
+    end
   end
 
   def body(outline, opts) do
@@ -138,9 +206,9 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp statement(concept, property, description, outline, depth, visited, opts) do
+  defp statement(subject, property, description, outline, depth, visited, opts) do
     if objects = Description.get(description, property) do
-      do_statement(concept, property, objects, outline, depth, visited, opts)
+      do_statement(subject, property, objects, outline, depth, visited, opts)
     else
       ""
     end
@@ -165,7 +233,7 @@ defmodule Skout.YAML.Encoder do
   end
 
   defp do_statement(_, unquote(Macro.escape(RDF.type())), objects, outline, depth, _, opts) do
-    filtered_objects = objects -- [RDF.iri(SKOS.Concept)]
+    filtered_objects = objects -- [RDF.iri(SKOS.Concept), RDF.iri(SKOS.ConceptScheme)]
 
     if not Enum.empty?(filtered_objects) do
       generic_statement(RDF.type(), filtered_objects, outline, depth, opts)
@@ -180,14 +248,12 @@ defmodule Skout.YAML.Encoder do
 
   defp generic_statement(property, objects, outline, depth, opts) do
     if key = Map.get(@known_properties, property) do
-      object_terms =
-        objects
-        |> Enum.map(fn object -> object_term(property, object, outline, opts) end)
-        |> Enum.reject(&is_nil/1)
-
-      indentation(depth + 1) <>
-        ":#{key}:" <>
-        objects(object_terms, depth) <>
+      indentation(depth + 1, Keyword.get(opts, :indent_style)) <>
+        property(key, Keyword.get(opts, :property_term_style)) <>
+        ":" <>
+        (objects
+         |> object_terms(property, outline, opts)
+         |> objects(depth)) <>
         "\n"
     else
       # unknown properties are simply ignored
@@ -195,15 +261,24 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp object_term(property, %IRI{} = object, outline, opts)
+  defp property(property_term, :concept_scheme_description), do: to_string(property_term)
+  defp property(property_term, _), do: ":" <> to_string(property_term)
+
+  defp object_terms(objects, property, outline, opts) do
+    objects
+    |> Enum.map(fn object -> object_term(object, property, outline, opts) end)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp object_term(%IRI{} = object, property, outline, opts)
        when property in @props_with_range_concept do
-    case object_term(nil, object, outline, opts) do
+    case object_term(object, nil, outline, opts) do
       ":" <> term -> term
       other -> other
     end
   end
 
-  defp object_term(_, %IRI{} = object, outline, _opts) do
+  defp object_term(%IRI{} = object, _, outline, _opts) do
     label = concept_label(object, outline)
 
     if label && to_string(object) == to_string(outline.manifest.base_iri) <> label do
@@ -213,16 +288,16 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp object_term(property, %Literal{} = object, _, _)
+  defp object_term(%Literal{} = object, property, _, _)
        when property in @props_with_range_concept do
     raise "Literal used as object on property #{property} with skos:Concept range: #{object}"
   end
 
-  defp object_term(_, %Literal{} = object, _outline, _) do
+  defp object_term(%Literal{} = object, _, _outline, _) do
     to_string(object)
   end
 
-  defp object_term(_, %RDF.BlankNode{}, _, _), do: nil
+  defp object_term(%RDF.BlankNode{}, _, _, _), do: nil
 
   defp objects([object_term], _), do: " " <> object_term
 
@@ -248,6 +323,8 @@ defmodule Skout.YAML.Encoder do
     ) <= @line_length
   end
 
-  defp indentation(0), do: ""
-  defp indentation(depth), do: String.duplicate("  ", depth - 1) <> "- "
+  defp indentation(depth), do: indentation(depth, :default)
+  defp indentation(0, _), do: ""
+  defp indentation(depth, :concept_scheme_description), do: String.duplicate("  ", depth - 1)
+  defp indentation(depth, _), do: String.duplicate("  ", depth - 1) <> "- "
 end
