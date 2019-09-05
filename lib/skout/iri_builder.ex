@@ -36,7 +36,7 @@ defmodule Skout.IriBuilder do
   end
 
   def from_label(label, base_iri, iri_normalization) when is_binary(label) do
-    IRI.merge(base_iri, normalize_label(iri_normalization, label))
+    RDF.iri(to_string(base_iri) <> normalize_label(iri_normalization, label))
   end
 
   defp normalize_label(:camelize, label), do: camelize(label)

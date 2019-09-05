@@ -12,6 +12,9 @@ defmodule Skout.IriBuilderTest do
     test "with simple term" do
       assert IriBuilder.from_label("Foo", ex_manifest()) == iri(EX.Foo)
       assert IriBuilder.from_label("bar", ex_manifest()) == EX.bar()
+
+      assert IriBuilder.from_label("Bar", ~I<http://example.com/foo#>, :camelize) ==
+               ~I<http://example.com/foo#Bar>
     end
 
     test "with a term with whitespace and manifest.iri_normalization == :camelize (default)" do
