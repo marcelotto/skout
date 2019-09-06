@@ -57,6 +57,13 @@ defmodule Skout.Outline do
     end)
   end
 
+  def add!(manifest, triples) do
+    case add(manifest, triples) do
+      {:ok, outline} -> outline
+      {:error, error} -> raise error
+    end
+  end
+
   def update_graph(%__MODULE__{} = outline, fun) do
     %__MODULE__{outline | skos: fun.(outline.skos)}
   end

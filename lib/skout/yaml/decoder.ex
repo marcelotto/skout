@@ -24,6 +24,13 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
+  def decode!(yaml_string, opts \\ []) do
+    case decode(yaml_string, opts) do
+      {:ok, outline} -> outline
+      {:error, error} -> raise error
+    end
+  end
+
   defp parse_yaml(yaml_string) do
     case YamlElixir.read_all_from_string(yaml_string) do
       {:ok, [preamble, body]} ->

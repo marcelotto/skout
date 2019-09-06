@@ -12,6 +12,13 @@ defmodule Skout.RDF.Import do
     end
   end
 
+  def call!(graph, opts \\ []) do
+    case call(graph, opts) do
+      {:ok, outline} -> outline
+      {:error, error} -> raise error
+    end
+  end
+
   defp extract_skos(graph, concepts, outline) do
     Outline.add(
       outline,
