@@ -22,7 +22,8 @@ defmodule Skout.IriBuilderTest do
         "Foo bar" => EX.FooBar,
         "foo bar" => EX.fooBar(),
         "foo 1" => EX.foo1(),
-        "foo #1" => EX.foo1()
+        "foo #1" => EX.foo1(),
+        "foo/1" => EX.foo1()
       }
       |> Enum.each(fn {label, iri} ->
         assert IriBuilder.from_label(label, ex_manifest()) == iri(iri)
@@ -34,7 +35,8 @@ defmodule Skout.IriBuilderTest do
         "Foo bar" => EX.foo_bar(),
         "foo bar" => EX.foo_bar(),
         "foo 1" => EX.foo_1(),
-        "foo #1" => EX.foo_1()
+        "foo #1" => EX.foo_1(),
+        "foo/1" => EX.foo_1()
       }
       |> Enum.each(fn {label, iri} ->
         assert IriBuilder.from_label(label, ex_manifest(iri_normalization: :underscore)) ==
