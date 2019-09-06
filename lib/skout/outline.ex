@@ -72,7 +72,19 @@ defmodule Skout.Outline do
     update_graph(outline, &Graph.add(&1, data))
   end
 
-  defdelegate from_rdf(graph, opts \\ []), to: Skout.RDF.Import, as: :call
+  defdelegate from_yaml(yaml, opts \\ []), to: Skout.YAML.Decoder, as: :decode
+  defdelegate from_yaml!(yaml, opts \\ []), to: Skout.YAML.Decoder, as: :decode!
+  defdelegate to_yaml(outline, opts \\ []), to: Skout.YAML.Encoder, as: :encode
+  defdelegate to_yaml!(outline, opts \\ []), to: Skout.YAML.Encoder, as: :encode!
 
+  defdelegate from_rdf(graph, opts \\ []), to: Skout.RDF.Import, as: :call
+  defdelegate from_rdf!(graph, opts \\ []), to: Skout.RDF.Import, as: :call!
+
+  @doc """
+  Returns the RDF graph of the SKOS concept scheme of `outline`.
+
+  Note that other than the other conversion functions this one doesn't return
+  the result in an ok tuple, since it can't fail.
+  """
   def to_rdf(%__MODULE__{} = outline), do: outline.skos
 end
