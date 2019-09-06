@@ -41,6 +41,7 @@ defmodule Skout.IriBuilder do
 
   defp normalize_label(:camelize, label), do: camelize(label)
   defp normalize_label(:underscore, label), do: underscore(label)
+  defp normalize_label(fun, label) when is_function(fun), do: fun.(label)
 
   def underscore(word) when is_binary(word) do
     word

@@ -9,7 +9,7 @@ defmodule Skout.IriBuilderTest do
       assert IriBuilder.from_label(EX.foo(), ex_manifest()) == EX.foo()
     end
 
-    test "with simple term" do
+    test "with simple label" do
       assert IriBuilder.from_label("Foo", ex_manifest()) == iri(EX.Foo)
       assert IriBuilder.from_label("bar", ex_manifest()) == EX.bar()
 
@@ -17,7 +17,7 @@ defmodule Skout.IriBuilderTest do
                ~I<http://example.com/foo#Bar>
     end
 
-    test "with a term with whitespace and manifest.iri_normalization == :camelize (default)" do
+    test "with a label with whitespace and manifest.iri_normalization == :camelize (default)" do
       %{
         "Foo bar" => EX.FooBar,
         "foo bar" => EX.fooBar(),
@@ -30,7 +30,7 @@ defmodule Skout.IriBuilderTest do
       end)
     end
 
-    test "with a term with whitespace and manifest.iri_normalization == :underscore" do
+    test "with a label with whitespace and manifest.iri_normalization == :underscore" do
       %{
         "Foo bar" => EX.foo_bar(),
         "foo bar" => EX.foo_bar(),
@@ -43,6 +43,12 @@ defmodule Skout.IriBuilderTest do
                  iri(iri)
       end)
     end
+
+    test "with a transformation function" do
+      assert IriBuilder.from_label("Foo", ex_manifest(iri_normalization: &String.upcase/1)) ==
+        iri(EX.FOO)
+    end
+  end
 
   describe "predicate_to_iri/2" do
     test "with IRI" do
