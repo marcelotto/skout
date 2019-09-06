@@ -1,15 +1,15 @@
-defmodule Skout.OutlineTest do
+defmodule Skout.DocumentTest do
   use Skout.Test.Case
-  doctest Skout.Outline
+  doctest Skout.Document
 
-  alias Skout.Outline
+  alias Skout.Document
 
   describe "add/2" do
     test "with a valid triple of plain strings using the narrower property" do
-      assert Outline.add(ex_outline(), {iri(EX.Foo), SKOS.narrower(), iri(EX.Bar)}) ==
+      assert Document.add(ex_document(), {iri(EX.Foo), SKOS.narrower(), iri(EX.Bar)}) ==
                {:ok,
-                %Outline{
-                  ex_outline()
+                %Document{
+                  ex_document()
                   | skos:
                       RDF.graph(
                         [
@@ -24,10 +24,10 @@ defmodule Skout.OutlineTest do
     end
 
     test "with a valid triple with a literal on object position" do
-      assert Outline.add(ex_outline(), {iri(EX.Foo), SKOS.prefLabel(), ~L"Foo"}) ==
+      assert Document.add(ex_document(), {iri(EX.Foo), SKOS.prefLabel(), ~L"Foo"}) ==
                {:ok,
-                %Outline{
-                  ex_outline()
+                %Document{
+                  ex_document()
                   | skos:
                       RDF.graph({EX.Foo, SKOS.prefLabel(), ~L"Foo"},
                         prefixes: default_prefixes()

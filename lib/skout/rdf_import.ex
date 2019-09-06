@@ -1,27 +1,27 @@
 defmodule Skout.RDF.Import do
-  alias Skout.Outline
+  alias Skout.Document
   alias RDF.NS.SKOS
 
   def call(graph, opts \\ []) do
     with {:ok, concept_scheme} <- determine_concept_scheme(graph, opts),
          concepts = concepts(graph, concept_scheme),
          {:ok, base_iri} <- determine_base_iri(concepts, opts),
-         {:ok, outline} <- Outline.new(concept_scheme: concept_scheme, base_iri: base_iri),
-         {:ok, outline} <- extract_skos(graph, concepts, outline) do
-      {:ok, outline}
+         {:ok, document} <- Document.new(concept_scheme: concept_scheme, base_iri: base_iri),
+         {:ok, document} <- extract_skos(graph, concepts, document) do
+      {:ok, document}
     end
   end
 
   def call!(graph, opts \\ []) do
     case call(graph, opts) do
-      {:ok, outline} -> outline
+      {:ok, document} -> document
       {:error, error} -> raise error
     end
   end
 
-  defp extract_skos(graph, concepts, outline) do
-    Outline.add(
-      outline,
+  defp extract_skos(graph, concepts, document) do
+    Document.add(
+      document,
       Enum.reduce(graph.descriptions, [], fn {subject, description}, triples ->
         if subject in concepts do
           triples ++ RDF.Description.triples(description)

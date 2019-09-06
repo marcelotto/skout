@@ -1,5 +1,5 @@
 defmodule Skout.YAML.Encoder do
-  alias Skout.{Outline, IriBuilder, Materialization}
+  alias Skout.{Document, IriBuilder, Materialization}
   alias RDF.NS.{SKOS, RDFS}
   alias Skout.NS.DC
   alias RDF.{Graph, Description, IRI, Literal}
@@ -86,29 +86,29 @@ defmodule Skout.YAML.Encoder do
 
   @line_length 80
 
-  def encode(outline, opts \\ []) do
+  def encode(document, opts \\ []) do
     {:ok,
      """
-     #{preamble(outline, opts) |> String.trim()}
+     #{preamble(document, opts) |> String.trim()}
      ---
-     #{body(outline, opts)}
+     #{body(document, opts)}
      """}
   end
 
-  def encode!(outline, opts \\ []) do
-    case encode(outline, opts) do
+  def encode!(document, opts \\ []) do
+    case encode(document, opts) do
       {:ok, yaml} -> yaml
       {:error, error} -> raise error
     end
   end
 
-  def preamble(outline, opts) do
-    outline.manifest
+  def preamble(document, opts) do
+    document.manifest
     |> Map.from_struct()
     |> Enum.reject(fn {key, value} -> is_nil(value) or key in [:materialization] end)
     |> Enum.map(fn
       {:concept_scheme, description} ->
-        concept_scheme(outline, description, opts)
+        concept_scheme(document, description, opts)
 
       {key, value} ->
         """
@@ -120,8 +120,8 @@ defmodule Skout.YAML.Encoder do
 
   defp concept_scheme(_, false, _), do: ""
 
-  defp concept_scheme(outline, concept_scheme, opts) do
-    description = concept_scheme_description(outline, concept_scheme)
+  defp concept_scheme(document, concept_scheme, opts) do
+    description = concept_scheme_description(document, concept_scheme)
 
     if Enum.empty?(description) do
       """
@@ -137,7 +137,7 @@ defmodule Skout.YAML.Encoder do
             concept_scheme,
             property,
             description,
-            outline,
+            document,
             1,
             nil,
             opts
@@ -148,12 +148,12 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp concept_scheme_description(outline, id) do
-    filtered_description(outline, id, @concept_scheme_description_blueprint)
+  defp concept_scheme_description(document, id) do
+    filtered_description(document, id, @concept_scheme_description_blueprint)
   end
 
-  defp filtered_description(outline, subject, filtered_properties) do
-    outline.skos
+  defp filtered_description(document, subject, filtered_properties) do
+    document.skos
     |> Graph.get(subject, Description.new(subject))
     |> Enum.filter(fn {_, predicate, _} -> predicate in filtered_properties end)
     |> case do
@@ -162,17 +162,17 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  def body(outline, opts) do
-    outline
+  def body(document, opts) do
+    document
     |> Materialization.top_concepts()
     |> MapSet.new()
-    |> concepts(outline, 0, MapSet.new(), opts)
+    |> concepts(document, 0, MapSet.new(), opts)
   end
 
-  defp concepts(concepts, outline, depth, visited, opts) do
+  defp concepts(concepts, document, depth, visited, opts) do
     if MapSet.disjoint?(visited, concepts) do
       concepts
-      |> Enum.map(fn concept -> concept(concept, outline, depth, visited, opts) end)
+      |> Enum.map(fn concept -> concept(concept, document, depth, visited, opts) end)
       |> Enum.join(indentation(depth))
     else
       raise "concept scheme contains a circle through #{
@@ -181,18 +181,18 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp concept(concept, outline, depth, visited, opts) do
-    description = Graph.description(outline.skos, concept)
+  defp concept(concept, document, depth, visited, opts) do
+    description = Graph.description(document.skos, concept)
 
     concept_label(concept, description) <>
       ":\n" <>
       Enum.map_join(@concept_description_blueprint, fn property ->
-        statement(concept, property, description, outline, depth, visited, opts)
+        statement(concept, property, description, document, depth, visited, opts)
       end)
   end
 
-  defp concept_label(concept, %Outline{} = outline) do
-    if description = Graph.description(outline.skos, concept) do
+  defp concept_label(concept, %Document{} = document) do
+    if description = Graph.description(document.skos, concept) do
       concept_label(concept, description)
     end
   end
@@ -206,9 +206,9 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp statement(subject, property, description, outline, depth, visited, opts) do
+  defp statement(subject, property, description, document, depth, visited, opts) do
     if objects = Description.get(description, property) do
-      do_statement(subject, property, objects, outline, depth, visited, opts)
+      do_statement(subject, property, objects, document, depth, visited, opts)
     else
       ""
     end
@@ -218,41 +218,41 @@ defmodule Skout.YAML.Encoder do
          concept,
          unquote(Macro.escape(SKOS.narrower())),
          narrower_concepts,
-         outline,
+         document,
          depth,
          visited,
          opts
        ) do
     narrower_concepts
     |> MapSet.new()
-    |> concepts(outline, depth + 1, MapSet.put(visited, concept), opts)
+    |> concepts(document, depth + 1, MapSet.put(visited, concept), opts)
     |> case do
       "" -> ""
       next_level -> indentation(depth + 1) <> next_level
     end
   end
 
-  defp do_statement(_, unquote(Macro.escape(RDF.type())), objects, outline, depth, _, opts) do
+  defp do_statement(_, unquote(Macro.escape(RDF.type())), objects, document, depth, _, opts) do
     filtered_objects = objects -- [RDF.iri(SKOS.Concept), RDF.iri(SKOS.ConceptScheme)]
 
     if not Enum.empty?(filtered_objects) do
-      generic_statement(RDF.type(), filtered_objects, outline, depth, opts)
+      generic_statement(RDF.type(), filtered_objects, document, depth, opts)
     else
       ""
     end
   end
 
-  defp do_statement(_, property, objects, outline, depth, _, opts) do
-    generic_statement(property, objects, outline, depth, opts)
+  defp do_statement(_, property, objects, document, depth, _, opts) do
+    generic_statement(property, objects, document, depth, opts)
   end
 
-  defp generic_statement(property, objects, outline, depth, opts) do
+  defp generic_statement(property, objects, document, depth, opts) do
     if key = Map.get(@known_properties, property) do
       indentation(depth + 1, Keyword.get(opts, :indent_style)) <>
         property(key, Keyword.get(opts, :property_term_style)) <>
         ":" <>
         (objects
-         |> object_terms(property, outline, opts)
+         |> object_terms(property, document, opts)
          |> objects(depth)) <>
         "\n"
     else
@@ -264,24 +264,24 @@ defmodule Skout.YAML.Encoder do
   defp property(property_term, :concept_scheme_description), do: to_string(property_term)
   defp property(property_term, _), do: ":" <> to_string(property_term)
 
-  defp object_terms(objects, property, outline, opts) do
+  defp object_terms(objects, property, document, opts) do
     objects
-    |> Enum.map(fn object -> object_term(object, property, outline, opts) end)
+    |> Enum.map(fn object -> object_term(object, property, document, opts) end)
     |> Enum.reject(&is_nil/1)
   end
 
-  defp object_term(%IRI{} = object, property, outline, opts)
+  defp object_term(%IRI{} = object, property, document, opts)
        when property in @props_with_range_concept do
-    case object_term(object, nil, outline, opts) do
+    case object_term(object, nil, document, opts) do
       ":" <> term -> term
       other -> other
     end
   end
 
-  defp object_term(%IRI{} = object, _, outline, _opts) do
-    label = concept_label(object, outline)
+  defp object_term(%IRI{} = object, _, document, _opts) do
+    label = concept_label(object, document)
 
-    if label && to_string(object) == to_string(outline.manifest.base_iri) <> label do
+    if label && to_string(object) == to_string(document.manifest.base_iri) <> label do
       ":#{label}"
     else
       "<#{object}>"
@@ -293,7 +293,7 @@ defmodule Skout.YAML.Encoder do
     raise "Literal used as object on property #{property} with skos:Concept range: #{object}"
   end
 
-  defp object_term(%Literal{} = object, _, _outline, _) do
+  defp object_term(%Literal{} = object, _, _document, _) do
     to_string(object)
   end
 

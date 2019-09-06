@@ -10,11 +10,11 @@ defmodule Skout.Helper do
 
   def cont_or_halt(result) do
     case result do
-      {:ok, outline} ->
-        {:cont, {:ok, outline}}
+      {:ok, document} ->
+        {:cont, {:ok, document}}
 
-      {:ok, _, outline} ->
-        {:cont, {:ok, outline}}
+      {:ok, _, document} ->
+        {:cont, {:ok, document}}
 
       {:error, error} ->
         {:halt, {:error, error}}

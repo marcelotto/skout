@@ -125,14 +125,14 @@ defmodule Skout.Materialization do
     do_infer(triple, Map.put(settings, finished, false), manifest) ++ materializations
   end
 
-  def infer_top_concepts(outline) do
-    if outline.manifest.concept_scheme do
-      outline
+  def infer_top_concepts(document) do
+    if document.manifest.concept_scheme do
+      document
       |> top_concepts()
       |> Enum.reduce([], fn top_concept, triples ->
         [
-          {top_concept, SKOS.topConceptOf(), outline.manifest.concept_scheme},
-          {outline.manifest.concept_scheme, SKOS.hasTopConcept(), top_concept}
+          {top_concept, SKOS.topConceptOf(), document.manifest.concept_scheme},
+          {document.manifest.concept_scheme, SKOS.hasTopConcept(), top_concept}
           | triples
         ]
       end)
@@ -142,8 +142,8 @@ defmodule Skout.Materialization do
   end
 
   @doc false
-  def top_concepts(outline) do
-    outline.skos
+  def top_concepts(document) do
+    document.skos
     |> SPARQL.execute_query(
       """
       SELECT ?concept WHERE {

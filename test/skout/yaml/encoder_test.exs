@@ -4,33 +4,33 @@ defmodule Skout.YAML.EncoderTest do
 
   import Skout.YAML.Encoder, only: [encode: 1]
 
-  @example_outline %Skout.Outline{
+  @example_document %Skout.Document{
     manifest: ex_manifest(),
     skos: ex_skos()
   }
 
-  test "empty SKOS outline" do
-    outline = %Skout.Outline{
+  test "empty Skout document" do
+    document = %Skout.Document{
       manifest: ex_manifest(),
       skos: RDF.Graph.new()
     }
 
-    assert encode(outline) ==
+    assert encode(document) ==
              {:ok,
               """
-              base_iri: #{outline.manifest.base_iri}
-              iri_normalization: #{outline.manifest.iri_normalization}
+              base_iri: #{document.manifest.base_iri}
+              iri_normalization: #{document.manifest.iri_normalization}
               ---
 
               """}
   end
 
-  test "non-empty SKOS outline" do
-    assert encode(@example_outline) ==
+  test "non-empty Skout document" do
+    assert encode(@example_document) ==
              {:ok,
               """
-              base_iri: #{@example_outline.manifest.base_iri}
-              iri_normalization: #{@example_outline.manifest.iri_normalization}
+              base_iri: #{@example_document.manifest.base_iri}
+              iri_normalization: #{@example_document.manifest.iri_normalization}
               ---
               Foo:
               - Bar:
@@ -41,10 +41,10 @@ defmodule Skout.YAML.EncoderTest do
               """}
   end
 
-  test "SKOS outline with descriptions" do
+  test "Skout document with descriptions" do
     assert encode(
-             @example_outline
-             |> Skout.Outline.update_graph(fn skos ->
+             @example_document
+             |> Skout.Document.update_graph(fn skos ->
                skos
                |> Graph.add([
                  {EX.Foo, SKOS.related(), EX.qux()},
@@ -67,8 +67,8 @@ defmodule Skout.YAML.EncoderTest do
            ) ==
              {:ok,
               """
-              base_iri: #{@example_outline.manifest.base_iri}
-              iri_normalization: #{@example_outline.manifest.iri_normalization}
+              base_iri: #{@example_document.manifest.base_iri}
+              iri_normalization: #{@example_document.manifest.iri_normalization}
               ---
               Foo:
               - :altLabel: [false, true, 3.14, 42]
@@ -87,48 +87,48 @@ defmodule Skout.YAML.EncoderTest do
               """}
   end
 
-  test "SKOS outline with circles" do
+  test "Skout document with circles" do
     assert_raise RuntimeError, ~r/concept scheme contains a circle/, fn ->
-      encode(outline_with_circle())
+      encode(document_with_circle())
     end
   end
 
   describe "preamble" do
     test "concept_scheme" do
-      outline = %Skout.Outline{
+      document = %Skout.Document{
         manifest: ex_manifest(concept_scheme: "http://example.com/foo#"),
         skos: RDF.Graph.new()
       }
 
-      assert encode(outline) ==
+      assert encode(document) ==
                {:ok,
                 """
-                base_iri: #{outline.manifest.base_iri}
+                base_iri: #{document.manifest.base_iri}
                 concept_scheme: http://example.com/foo#
-                iri_normalization: #{outline.manifest.iri_normalization}
+                iri_normalization: #{document.manifest.iri_normalization}
                 ---
 
                 """}
     end
 
     test "suppressed concept_scheme" do
-      outline = %Skout.Outline{
+      document = %Skout.Document{
         manifest: ex_manifest(concept_scheme: false),
         skos: RDF.Graph.new()
       }
 
-      assert encode(outline) ==
+      assert encode(document) ==
                {:ok,
                 """
-                base_iri: #{outline.manifest.base_iri}
-                iri_normalization: #{outline.manifest.iri_normalization}
+                base_iri: #{document.manifest.base_iri}
+                iri_normalization: #{document.manifest.iri_normalization}
                 ---
 
                 """}
     end
 
     test "concept scheme with descriptions" do
-      outline = %Skout.Outline{
+      document = %Skout.Document{
         manifest: ex_manifest(concept_scheme: "http://example.com/foo#"),
         skos:
           RDF.Graph.new(
@@ -143,34 +143,34 @@ defmodule Skout.YAML.EncoderTest do
           )
       }
 
-      assert encode(outline) ==
+      assert encode(document) ==
                {:ok,
                 """
-                base_iri: #{outline.manifest.base_iri}
+                base_iri: #{document.manifest.base_iri}
                 concept_scheme:
                   id: http://example.com/foo#
                   title: An example concept scheme
                   creator: John Doe
                   created: 2019
                   definition: A description of a concept scheme
-                iri_normalization: #{outline.manifest.iri_normalization}
+                iri_normalization: #{document.manifest.iri_normalization}
                 ---
 
                 """}
     end
 
     test "default_language" do
-      outline = %Skout.Outline{
+      document = %Skout.Document{
         manifest: ex_manifest(default_language: "en"),
         skos: RDF.Graph.new()
       }
 
-      assert encode(outline) ==
+      assert encode(document) ==
                {:ok,
                 """
-                base_iri: #{outline.manifest.base_iri}
+                base_iri: #{document.manifest.base_iri}
                 default_language: en
-                iri_normalization: #{outline.manifest.iri_normalization}
+                iri_normalization: #{document.manifest.iri_normalization}
                 ---
 
                 """}

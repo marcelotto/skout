@@ -1,5 +1,5 @@
 defmodule Skout.YAML.Decoder do
-  alias Skout.{Outline, Manifest, IriBuilder}
+  alias Skout.{Document, Manifest, IriBuilder}
   alias RDF.NS.SKOS
   alias RDF.IRI
 
@@ -17,16 +17,16 @@ defmodule Skout.YAML.Decoder do
               Map.pop(preamble, "concept_scheme", true)
             end),
          {:ok, manifest} <- build_manifest(preamble, opts),
-         {:ok, outline} <- Outline.new(manifest),
-         {:ok, outline} <- build_concept_scheme(outline, concept_scheme, opts),
-         {:ok, outline} <- build_skos(outline, body, opts) do
-      Outline.finalize(outline)
+         {:ok, document} <- Document.new(manifest),
+         {:ok, document} <- build_concept_scheme(document, concept_scheme, opts),
+         {:ok, document} <- build_skos(document, body, opts) do
+      Document.finalize(document)
     end
   end
 
   def decode!(yaml_string, opts \\ []) do
     case decode(yaml_string, opts) do
-      {:ok, outline} -> outline
+      {:ok, document} -> document
       {:error, error} -> raise error
     end
   end
@@ -72,27 +72,27 @@ defmodule Skout.YAML.Decoder do
     |> Manifest.new()
   end
 
-  defp build_concept_scheme(outline, concept_scheme_description, opts)
+  defp build_concept_scheme(document, concept_scheme_description, opts)
        when is_map(concept_scheme_description) do
     case Map.pop(concept_scheme_description, "id", true) do
       {id, _} when id in [false, nil] ->
         {:error, "id field with IRI of concept scheme is missing"}
 
       {id, description} ->
-        with {:ok, outline} <- build_concept_scheme(outline, id, opts) do
-          add_description(outline, outline.manifest.concept_scheme, description, opts)
+        with {:ok, document} <- build_concept_scheme(document, id, opts) do
+          add_description(document, document.manifest.concept_scheme, description, opts)
         end
     end
   end
 
-  defp build_concept_scheme(outline, concept_scheme, _opts) do
-    concept_scheme_iri = concept_scheme_iri(concept_scheme, outline.manifest)
+  defp build_concept_scheme(document, concept_scheme, _opts) do
+    concept_scheme_iri = concept_scheme_iri(concept_scheme, document.manifest)
 
     {:ok,
-     %Outline{
-       outline
-       | manifest: %Manifest{outline.manifest | concept_scheme: concept_scheme_iri},
-         skos: RDF.Graph.add(outline.skos, concept_scheme_statements(concept_scheme_iri))
+     %Document{
+       document
+       | manifest: %Manifest{document.manifest | concept_scheme: concept_scheme_iri},
+         skos: RDF.Graph.add(document.skos, concept_scheme_statements(concept_scheme_iri))
      }}
   end
 
@@ -110,64 +110,64 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
-  defp build_skos(outline, map, opts) do
-    Enum.reduce_while(map, {:ok, outline}, fn
-      {concept, children}, {:ok, outline} ->
-        Enum.reduce_while(children, {:ok, outline}, fn
-          hierarchy, {:ok, outline} when is_map(hierarchy) ->
-            add_concept(outline, concept, hierarchy, opts)
+  defp build_skos(document, map, opts) do
+    Enum.reduce_while(map, {:ok, document}, fn
+      {concept, children}, {:ok, document} ->
+        Enum.reduce_while(children, {:ok, document}, fn
+          hierarchy, {:ok, document} when is_map(hierarchy) ->
+            add_concept(document, concept, hierarchy, opts)
             |> cont_or_halt()
 
-          {child, nil}, {:ok, outline} ->
-            add_concept(outline, concept, child, opts)
+          {child, nil}, {:ok, document} ->
+            add_concept(document, concept, child, opts)
             |> cont_or_halt()
 
-          {child, hierarchy}, {:ok, outline} ->
-            add_concept(outline, concept, child, hierarchy, opts)
+          {child, hierarchy}, {:ok, document} ->
+            add_concept(document, concept, child, hierarchy, opts)
             |> cont_or_halt()
 
-          child, {:ok, outline} ->
-            add_concept(outline, concept, child, opts)
+          child, {:ok, document} ->
+            add_concept(document, concept, child, opts)
             |> cont_or_halt()
         end)
         |> cont_or_halt()
 
-      hierarchy, {:ok, outline} when is_map(hierarchy) ->
-        outline
+      hierarchy, {:ok, document} when is_map(hierarchy) ->
+        document
         |> build_skos(hierarchy, opts)
         |> cont_or_halt()
 
-      concept, {:ok, outline} ->
-        add_concept(outline, concept, opts)
+      concept, {:ok, document} ->
+        add_concept(document, concept, opts)
         |> cont_or_halt()
     end)
   end
 
-  defp add_concept(outline, concept, _) do
-    with {:ok, outline} <-
-           Outline.add(outline, label_statement(concept, outline.manifest)),
-         {:ok, outline} <-
-           Outline.add(outline, concept_statements(concept, outline.manifest)) do
-      {:ok, :description, outline}
+  defp add_concept(document, concept, _) do
+    with {:ok, document} <-
+           Document.add(document, label_statement(concept, document.manifest)),
+         {:ok, document} <-
+           Document.add(document, concept_statements(concept, document.manifest)) do
+      {:ok, :description, document}
     end
   end
 
-  defp add_concept(outline, concept, child, %{} = hierarchy, opts) do
-    add_concept(outline, concept, %{child => hierarchy}, opts)
+  defp add_concept(document, concept, child, %{} = hierarchy, opts) do
+    add_concept(document, concept, %{child => hierarchy}, opts)
   end
 
-  defp add_concept(outline, concept, %{} = hierarchy, opts) do
+  defp add_concept(document, concept, %{} = hierarchy, opts) do
     case Map.to_list(hierarchy) do
       [{child, nil}] ->
-        add_concept(outline, concept, child, opts)
+        add_concept(document, concept, child, opts)
 
       [{child, _}] ->
-        case add_concept(outline, concept, child, opts) do
-          {:ok, :hierarchy, outline} ->
-            build_skos(outline, hierarchy, opts)
+        case add_concept(document, concept, child, opts) do
+          {:ok, :hierarchy, document} ->
+            build_skos(document, hierarchy, opts)
 
-          {:ok, :description, outline} ->
-            add_hierarchy_embedded_description(outline, concept, hierarchy, opts)
+          {:ok, :description, document} ->
+            add_hierarchy_embedded_description(document, concept, hierarchy, opts)
 
           {:error, _} = error ->
             error
@@ -175,43 +175,43 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
-  defp add_concept(outline, concept, ":" <> _, opts),
-    do: add_concept(outline, concept, opts)
+  defp add_concept(document, concept, ":" <> _, opts),
+    do: add_concept(document, concept, opts)
 
-  defp add_concept(outline, concept, narrower, _) do
-    with {:ok, outline} <-
-           Outline.add(outline, label_statement(concept, outline.manifest)),
-         {:ok, outline} <-
-           Outline.add(outline, label_statement(narrower, outline.manifest)),
-         {:ok, outline} <-
-           Outline.add(outline, narrower_statement(concept, narrower, outline.manifest)) do
-      {:ok, :hierarchy, outline}
+  defp add_concept(document, concept, narrower, _) do
+    with {:ok, document} <-
+           Document.add(document, label_statement(concept, document.manifest)),
+         {:ok, document} <-
+           Document.add(document, label_statement(narrower, document.manifest)),
+         {:ok, document} <-
+           Document.add(document, narrower_statement(concept, narrower, document.manifest)) do
+      {:ok, :hierarchy, document}
     end
   end
 
-  defp add_description(outline, concept, description, opts) do
-    Enum.reduce_while(description, {:ok, outline}, fn
-      {property, objects}, outline ->
-        add_description_statements(outline, concept, property, objects, opts)
+  defp add_description(document, concept, description, opts) do
+    Enum.reduce_while(description, {:ok, document}, fn
+      {property, objects}, document ->
+        add_description_statements(document, concept, property, objects, opts)
         |> cont_or_halt()
     end)
   end
 
-  defp add_hierarchy_embedded_description(outline, concept, description, opts) do
-    Enum.reduce_while(description, {:ok, outline}, fn
-      {":" <> property, objects}, outline ->
-        add_description_statements(outline, concept, property, objects, opts)
+  defp add_hierarchy_embedded_description(document, concept, description, opts) do
+    Enum.reduce_while(description, {:ok, document}, fn
+      {":" <> property, objects}, document ->
+        add_description_statements(document, concept, property, objects, opts)
         |> cont_or_halt()
     end)
   end
 
-  defp add_description_statements(outline, concept, property, objects, _opts) do
+  defp add_description_statements(document, concept, property, objects, _opts) do
     objects
     |> List.wrap()
-    |> Enum.reduce_while(outline, fn object, {:ok, outline} ->
+    |> Enum.reduce_while(document, fn object, {:ok, document} ->
       with {:ok, statement} <-
-             generic_statement(concept, property, object, outline.manifest) do
-        Outline.add(outline, statement)
+             generic_statement(concept, property, object, document.manifest) do
+        Document.add(document, statement)
       end
       |> cont_or_halt()
     end)

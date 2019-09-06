@@ -4,10 +4,10 @@ defmodule Skout.YAML.DecoderTest do
 
   import Skout.YAML.Decoder, only: [decode: 1, decode: 2]
 
-  test "empty SKOS outline" do
+  test "empty Skout document" do
     assert decode("", base_iri: ex_base_iri()) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   Graph.new(ex_concept_scheme_statements(),
@@ -16,7 +16,7 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
-  test "simple SKOS outline" do
+  test "simple Skout document" do
     assert decode(
              """
              Foo:
@@ -28,7 +28,7 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: ex_skos()
               }}
@@ -44,7 +44,7 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: ex_skos()
               }}
@@ -56,7 +56,7 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   Graph.new(prefixes: default_prefixes())
@@ -75,7 +75,7 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
-  test "simple SKOS outline without hyphens in the hierarchy" do
+  test "simple Skout document without hyphens in the hierarchy" do
     assert decode(
              """
              Foo:
@@ -87,13 +87,13 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: ex_skos()
               }}
   end
 
-  test "simple SKOS outline with preamble" do
+  test "simple Skout document with preamble" do
     assert decode(
              """
              default_language:
@@ -107,13 +107,13 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: ex_skos()
               }}
   end
 
-  test "SKOS outline with concept description with known properties" do
+  test "Skout document with concept description with known properties" do
     assert decode(
              """
              Foo:
@@ -135,7 +135,7 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   ex_skos([
@@ -199,7 +199,7 @@ defmodule Skout.YAML.DecoderTest do
              base_iri: ex_base_iri()
            ) ==
              {:ok,
-              %Skout.Outline{
+              %Skout.Document{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   EX.Foo
@@ -235,32 +235,32 @@ defmodule Skout.YAML.DecoderTest do
 
   describe "concept scheme" do
     test "without the concept_scheme the base_iri is used" do
-      assert {:ok, outline} = decode("", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == ex_base_iri()
+      assert {:ok, document} = decode("", base_iri: ex_base_iri())
+      assert document.manifest.concept_scheme == ex_base_iri()
     end
 
     test "concept_scheme with simple term" do
-      assert {:ok, outline} = decode("concept_scheme: Foo\n---", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == iri(EX.Foo)
+      assert {:ok, document} = decode("concept_scheme: Foo\n---", base_iri: ex_base_iri())
+      assert document.manifest.concept_scheme == iri(EX.Foo)
     end
 
     test "concept_scheme with iri" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode("concept_scheme: http://other_example.com\n---", base_iri: ex_base_iri())
 
-      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
+      assert document.manifest.concept_scheme == ~I<http://other_example.com>
     end
 
     test "concept_scheme with iri in angle brackets" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode("concept_scheme: <http://other_example.com>\n---", base_iri: ex_base_iri())
 
-      assert outline.manifest.concept_scheme == ~I<http://other_example.com>
+      assert document.manifest.concept_scheme == ~I<http://other_example.com>
     end
 
     test "setting the concept scheme to false prevents generating any concept scheme statements" do
-      assert {:ok, outline} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
-      assert outline.manifest.concept_scheme == false
+      assert {:ok, document} = decode("concept_scheme: false\n---", base_iri: ex_base_iri())
+      assert document.manifest.concept_scheme == false
     end
 
     test "concept_scheme with description" do
@@ -276,7 +276,7 @@ defmodule Skout.YAML.DecoderTest do
              """
              |> decode(base_iri: ex_base_iri()) ==
                {:ok,
-                %Skout.Outline{
+                %Skout.Document{
                   manifest: ex_manifest(concept_scheme: ~I<http://other_example.com>),
                   skos:
                     Graph.new(
@@ -294,7 +294,7 @@ defmodule Skout.YAML.DecoderTest do
 
   describe "preamble" do
     test "setting the base_iri" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode("""
                base_iri: http://foo.com/
                ---
@@ -302,11 +302,11 @@ defmodule Skout.YAML.DecoderTest do
                  - bar
                """)
 
-      assert outline.manifest.base_iri == ~I<http://foo.com/>
+      assert document.manifest.base_iri == ~I<http://foo.com/>
     end
 
     test "setting the base_iri with the base alias" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode("""
                base: http://foo.com/
                ---
@@ -314,11 +314,11 @@ defmodule Skout.YAML.DecoderTest do
                  - bar
                """)
 
-      assert outline.manifest.base_iri == ~I<http://foo.com/>
+      assert document.manifest.base_iri == ~I<http://foo.com/>
     end
 
     test "setting the concept_scheme" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  base_iri: http://foo.com/
@@ -329,11 +329,11 @@ defmodule Skout.YAML.DecoderTest do
                  concept_scheme: false
                )
 
-      assert outline.manifest.concept_scheme == false
+      assert document.manifest.concept_scheme == false
     end
 
     test "setting the default_language" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  default_language: en
@@ -344,9 +344,9 @@ defmodule Skout.YAML.DecoderTest do
                  base_iri: ex_base_iri()
                )
 
-      assert outline.manifest.default_language == "en"
+      assert document.manifest.default_language == "en"
 
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  default_language:
@@ -357,11 +357,11 @@ defmodule Skout.YAML.DecoderTest do
                  base_iri: ex_base_iri()
                )
 
-      assert outline.manifest.default_language == nil
+      assert document.manifest.default_language == nil
     end
 
     test "setting the iri_normalization" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  iri_normalization: underscore
@@ -372,11 +372,11 @@ defmodule Skout.YAML.DecoderTest do
                  base_iri: ex_base_iri()
                )
 
-      assert outline.manifest.iri_normalization == :underscore
+      assert document.manifest.iri_normalization == :underscore
     end
 
     test "setting the materialization opts" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  materialization:
@@ -389,12 +389,12 @@ defmodule Skout.YAML.DecoderTest do
                  base_iri: ex_base_iri()
                )
 
-      assert outline.manifest.materialization.inverse_hierarchy == false
-      assert outline.manifest.materialization.inverse_related == false
+      assert document.manifest.materialization.inverse_hierarchy == false
+      assert document.manifest.materialization.inverse_related == false
     end
 
     test "decode opts overwrite preamble opts" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                decode(
                  """
                  base: http://foo.com/
@@ -416,11 +416,11 @@ defmodule Skout.YAML.DecoderTest do
                  }
                )
 
-      assert outline.manifest.base_iri == ex_base_iri()
-      assert outline.manifest.default_language == "de"
-      assert outline.manifest.iri_normalization == :underscore
-      assert outline.manifest.materialization.inverse_hierarchy == false
-      assert outline.manifest.materialization.inverse_related == false
+      assert document.manifest.base_iri == ex_base_iri()
+      assert document.manifest.default_language == "de"
+      assert document.manifest.iri_normalization == :underscore
+      assert document.manifest.materialization.inverse_hierarchy == false
+      assert document.manifest.materialization.inverse_related == false
     end
   end
 end

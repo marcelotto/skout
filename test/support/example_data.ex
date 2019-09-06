@@ -16,8 +16,8 @@ defmodule Skout.ExampleData do
   def ex_manifest(), do: @ex_manifest
   def ex_manifest(opts), do: Map.merge(ex_manifest(), Map.new(opts))
 
-  @ex_outline Skout.Outline.new!(@ex_manifest)
-  def ex_outline(), do: @ex_outline
+  @ex_document Skout.Document.new!(@ex_manifest)
+  def ex_document(), do: @ex_document
 
   @ex_concept_scheme_statements [
     {@ex_base_iri, RDF.type(), SKOS.ConceptScheme}
@@ -62,7 +62,7 @@ defmodule Skout.ExampleData do
   def ex_skos(), do: @ex_skos
   def ex_skos(additions), do: ex_skos() |> Graph.add(additions)
 
-  @outline_with_circle %Skout.Outline{
+  @document_with_circle %Skout.Document{
     manifest: @ex_manifest,
     skos:
       RDF.Graph.new(
@@ -77,5 +77,5 @@ defmodule Skout.ExampleData do
         prefixes: @default_prefixes
       )
   }
-  def outline_with_circle(), do: @outline_with_circle
+  def document_with_circle(), do: @document_with_circle
 end

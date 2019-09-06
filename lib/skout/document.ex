@@ -1,4 +1,4 @@
-defmodule Skout.Outline do
+defmodule Skout.Document do
   defstruct [:manifest, :skos]
 
   alias Skout.{Manifest, Materialization}
@@ -28,30 +28,30 @@ defmodule Skout.Outline do
 
   def new!(manifest) do
     case new(manifest) do
-      {:ok, outline} -> outline
+      {:ok, document} -> document
       {:error, error} -> raise error
     end
   end
 
-  def finalize(%__MODULE__{} = outline) do
-    add(outline, Materialization.infer_top_concepts(outline))
+  def finalize(%__MODULE__{} = document) do
+    add(document, Materialization.infer_top_concepts(document))
   end
 
-  def add(%__MODULE__{} = outline, triple) when is_tuple(triple) do
+  def add(%__MODULE__{} = document, triple) when is_tuple(triple) do
     if RDF.Triple.valid?(triple) do
       {:ok,
        add_to_graph(
-         outline,
-         Materialization.infer(triple, outline.manifest)
+         document,
+         Materialization.infer(triple, document.manifest)
        )}
     else
       {:error, "invalid triple: #{inspect(triple)}"}
     end
   end
 
-  def add(%__MODULE__{} = outline, triples) when is_list(triples) do
-    Enum.reduce_while(triples, {:ok, outline}, fn triple, {:ok, outline} ->
-      outline
+  def add(%__MODULE__{} = document, triples) when is_list(triples) do
+    Enum.reduce_while(triples, {:ok, document}, fn triple, {:ok, document} ->
+      document
       |> add(triple)
       |> cont_or_halt()
     end)
@@ -59,32 +59,32 @@ defmodule Skout.Outline do
 
   def add!(manifest, triples) do
     case add(manifest, triples) do
-      {:ok, outline} -> outline
+      {:ok, document} -> document
       {:error, error} -> raise error
     end
   end
 
-  def update_graph(%__MODULE__{} = outline, fun) do
-    %__MODULE__{outline | skos: fun.(outline.skos)}
+  def update_graph(%__MODULE__{} = document, fun) do
+    %__MODULE__{document | skos: fun.(document.skos)}
   end
 
-  def add_to_graph(%__MODULE__{} = outline, data) do
-    update_graph(outline, &Graph.add(&1, data))
+  def add_to_graph(%__MODULE__{} = document, data) do
+    update_graph(document, &Graph.add(&1, data))
   end
 
   defdelegate from_yaml(yaml, opts \\ []), to: Skout.YAML.Decoder, as: :decode
   defdelegate from_yaml!(yaml, opts \\ []), to: Skout.YAML.Decoder, as: :decode!
-  defdelegate to_yaml(outline, opts \\ []), to: Skout.YAML.Encoder, as: :encode
-  defdelegate to_yaml!(outline, opts \\ []), to: Skout.YAML.Encoder, as: :encode!
+  defdelegate to_yaml(document, opts \\ []), to: Skout.YAML.Encoder, as: :encode
+  defdelegate to_yaml!(document, opts \\ []), to: Skout.YAML.Encoder, as: :encode!
 
   defdelegate from_rdf(graph, opts \\ []), to: Skout.RDF.Import, as: :call
   defdelegate from_rdf!(graph, opts \\ []), to: Skout.RDF.Import, as: :call!
 
   @doc """
-  Returns the RDF graph of the SKOS concept scheme of `outline`.
+  Returns the RDF graph of the SKOS concept scheme of `document`.
 
   Note that other than the other conversion functions this one doesn't return
   the result in an ok tuple, since it can't fail.
   """
-  def to_rdf(%__MODULE__{} = outline), do: outline.skos
+  def to_rdf(%__MODULE__{} = document), do: document.skos
 end

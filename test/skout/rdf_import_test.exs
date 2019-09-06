@@ -14,13 +14,13 @@ defmodule Skout.RDF.ImportTest do
          ~I<http://example.com/foo#>}
       ]
       |> Enum.each(fn {concepts, expected_base_iri} ->
-        assert {:ok, outline} =
+        assert {:ok, document} =
                  Graph.new(
                    Enum.map(concepts, fn concept -> {concept, RDF.type(), SKOS.Concept} end)
                  )
                  |> call()
 
-        assert outline.manifest.base_iri == expected_base_iri
+        assert document.manifest.base_iri == expected_base_iri
       end)
 
       [
@@ -56,26 +56,26 @@ defmodule Skout.RDF.ImportTest do
           prefixes: default_prefixes()
         )
 
-      assert {:ok, outline} = Graph.new({EX.Foo, SKOS.narrower(), EX.Bar}) |> call()
-      assert outline.skos == expected_skos
+      assert {:ok, document} = Graph.new({EX.Foo, SKOS.narrower(), EX.Bar}) |> call()
+      assert document.skos == expected_skos
 
-      assert {:ok, outline} = Graph.new({EX.Bar, SKOS.broader(), EX.Foo}) |> call()
-      assert outline.skos == expected_skos
+      assert {:ok, document} = Graph.new({EX.Bar, SKOS.broader(), EX.Foo}) |> call()
+      assert document.skos == expected_skos
     end
   end
 
   describe "concept scheme" do
     test "detection of concept scheme" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                call(Graph.new({EX.Foo, RDF.type(), SKOS.ConceptScheme}), base_iri: EX)
 
-      assert outline.manifest.concept_scheme == iri(EX.Foo)
+      assert document.manifest.concept_scheme == iri(EX.Foo)
 
-      assert {:ok, outline} = call(Graph.new({EX.Foo, SKOS.inScheme(), EX.Bar}), base_iri: EX)
-      assert outline.manifest.concept_scheme == iri(EX.Bar)
+      assert {:ok, document} = call(Graph.new({EX.Foo, SKOS.inScheme(), EX.Bar}), base_iri: EX)
+      assert document.manifest.concept_scheme == iri(EX.Bar)
 
-      assert {:ok, outline} = call(Graph.new({EX.Foo, SKOS.inScheme(), EX.Bar}), base_iri: EX)
-      assert outline.manifest.concept_scheme == iri(EX.Bar)
+      assert {:ok, document} = call(Graph.new({EX.Foo, SKOS.inScheme(), EX.Bar}), base_iri: EX)
+      assert document.manifest.concept_scheme == iri(EX.Bar)
     end
 
     test "when concepts from different concept schemes are detected" do
@@ -89,15 +89,15 @@ defmodule Skout.RDF.ImportTest do
     end
 
     test "when given as opt" do
-      assert {:ok, outline} =
+      assert {:ok, document} =
                call(Graph.new({EX.Foo, RDF.type(), SKOS.ConceptScheme}),
                  concept_scheme: EX.bar(),
                  base_iri: EX
                )
 
-      assert outline.manifest.concept_scheme == EX.bar()
+      assert document.manifest.concept_scheme == EX.bar()
 
-      assert {:ok, outline} =
+      assert {:ok, document} =
                call(
                  Graph.new([
                    {EX.Foo, RDF.type(), SKOS.ConceptScheme},
@@ -107,7 +107,7 @@ defmodule Skout.RDF.ImportTest do
                  base_iri: EX
                )
 
-      assert outline.manifest.concept_scheme == EX.baz()
+      assert document.manifest.concept_scheme == EX.baz()
     end
   end
 end
