@@ -1,5 +1,6 @@
 defmodule Skout.ExampleData do
-  alias RDF.NS.SKOS
+  alias RDF.NS.{SKOS, RDFS}
+  alias Skout.NS.DC
   alias RDF.Graph
   alias Skout.Test.Case.EX
 
@@ -7,6 +8,9 @@ defmodule Skout.ExampleData do
 
   @ex_base_iri RDF.iri(EX.__base_iri__())
   def ex_base_iri(), do: @ex_base_iri
+
+  @default_prefixes %{"" => @ex_base_iri, skos: SKOS, rdfs: RDFS, dct: DC}
+  def default_prefixes(), do: @default_prefixes
 
   @ex_manifest Skout.Manifest.new!(base_iri: @ex_base_iri)
   def ex_manifest(), do: @ex_manifest
@@ -53,7 +57,7 @@ defmodule Skout.ExampleData do
                {EX.quux(), SKOS.broader(), EX.qux()}
              ] ++
                @ex_concept_scheme_statements,
-             prefixes: %{"" => @ex_manifest.base_iri, skos: SKOS}
+             prefixes: @default_prefixes
            )
   def ex_skos(), do: @ex_skos
   def ex_skos(additions), do: ex_skos() |> Graph.add(additions)
@@ -70,7 +74,7 @@ defmodule Skout.ExampleData do
           {EX.Foo, SKOS.narrower(), EX.Bar},
           {EX.Bar, SKOS.narrower(), EX.Foo}
         ],
-        prefixes: %{"" => @ex_manifest.base_iri, skos: SKOS}
+        prefixes: @default_prefixes
       )
   }
   def outline_with_circle(), do: @outline_with_circle

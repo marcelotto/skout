@@ -18,7 +18,7 @@ defmodule Skout.OutlineTest do
                           {EX.Bar, RDF.type(), SKOS.Concept},
                           {EX.Bar, SKOS.broader(), EX.Foo}
                         ],
-                        prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+                        prefixes: default_prefixes()
                       )
                 }}
     end
@@ -30,7 +30,7 @@ defmodule Skout.OutlineTest do
                   ex_outline()
                   | skos:
                       RDF.graph({EX.Foo, SKOS.prefLabel(), ~L"Foo"},
-                        prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+                        prefixes: default_prefixes()
                       )
                 }}
     end

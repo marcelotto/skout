@@ -3,7 +3,8 @@ defmodule Skout.Outline do
 
   alias Skout.{Manifest, Materialization}
   alias RDF.Graph
-  alias RDF.NS.SKOS
+  alias RDF.NS.{SKOS, RDFS}
+  alias Skout.NS.DC
 
   import Skout.Helper
 
@@ -16,7 +17,9 @@ defmodule Skout.Outline do
            Graph.new(
              prefixes: %{
                "" => manifest.base_iri,
-               skos: SKOS
+               skos: SKOS,
+               rdfs: RDFS,
+               dct: DC
              }
            )
        }}

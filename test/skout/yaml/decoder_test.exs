@@ -11,7 +11,7 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   Graph.new(ex_concept_scheme_statements(),
-                    prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+                    prefixes: default_prefixes()
                   )
               }}
   end
@@ -59,7 +59,7 @@ defmodule Skout.YAML.DecoderTest do
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
-                  Graph.new(prefixes: %{"" => ex_base_iri(), skos: SKOS})
+                  Graph.new(prefixes: default_prefixes())
                   |> Graph.add(
                     ex_base_iri()
                     |> RDF.type(SKOS.ConceptScheme)
@@ -215,7 +215,7 @@ defmodule Skout.YAML.DecoderTest do
                   )
                   |> SKOS.inScheme(ex_base_iri())
                   |> SKOS.topConceptOf(ex_base_iri())
-                  |> Graph.new(prefixes: %{"" => ex_manifest().base_iri, skos: SKOS})
+                  |> Graph.new(prefixes: default_prefixes())
                   |> Graph.add(
                     EX.Bar
                     |> RDF.type(SKOS.Concept)
@@ -286,7 +286,7 @@ defmodule Skout.YAML.DecoderTest do
                       |> SKOS.definition(~L"A description of a concept scheme")
                       |> DC.creator(~L"John Doe")
                       |> DC.created(RDF.integer(2019)),
-                      prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+                      prefixes: default_prefixes()
                     )
                 }}
     end

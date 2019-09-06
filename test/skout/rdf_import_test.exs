@@ -53,7 +53,7 @@ defmodule Skout.RDF.ImportTest do
             {EX.Foo, SKOS.narrower(), EX.Bar},
             {EX.Bar, SKOS.broader(), EX.Foo}
           ],
-          prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
+          prefixes: default_prefixes()
         )
 
       assert {:ok, outline} = Graph.new({EX.Foo, SKOS.narrower(), EX.Bar}) |> call()
