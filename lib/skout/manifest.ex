@@ -45,7 +45,7 @@ defmodule Skout.Manifest do
 
   defp normalize_iri_normalization(%{iri_normalization: iri_normalization} = manifest)
        when is_binary(iri_normalization) do
-    %__MODULE__{manifest | iri_normalization: String.to_existing_atom(manifest.iri_normalization)}
+    %__MODULE__{manifest | iri_normalization: String.to_atom(manifest.iri_normalization)}
   end
 
   defp normalize_iri_normalization(manifest), do: manifest
