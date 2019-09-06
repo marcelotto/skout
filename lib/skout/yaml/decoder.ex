@@ -124,7 +124,25 @@ defmodule Skout.YAML.Decoder do
             |> cont_or_halt()
         end)
         |> cont_or_halt()
+
+      hierarchy, {:ok, outline} when is_map(hierarchy) ->
+        outline
+        |> build_skos(hierarchy, opts)
+        |> cont_or_halt()
+
+      concept, {:ok, outline} ->
+        add_concept(outline, concept, opts)
+        |> cont_or_halt()
     end)
+  end
+
+  defp add_concept(outline, concept, _) do
+    with {:ok, outline} <-
+           Outline.add(outline, label_statement(concept, outline.manifest)),
+         {:ok, outline} <-
+           Outline.add(outline, concept_statements(concept, outline.manifest)) do
+      {:ok, :description, outline}
+    end
   end
 
   defp add_concept(outline, concept, child, %{} = hierarchy, opts) do
@@ -150,12 +168,8 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
-  defp add_concept(outline, concept, ":" <> _, _) do
-    with {:ok, outline} <-
-           Outline.add(outline, label_statement(concept, outline.manifest)) do
-      {:ok, :description, outline}
-    end
-  end
+  defp add_concept(outline, concept, ":" <> _, opts),
+    do: add_concept(outline, concept, opts)
 
   defp add_concept(outline, concept, narrower, _) do
     with {:ok, outline} <-
@@ -212,6 +226,10 @@ defmodule Skout.YAML.Decoder do
 
   defp concept_scheme_statements(concept_scheme_iri) do
     {concept_scheme_iri, RDF.type(), SKOS.ConceptScheme}
+  end
+
+  defp concept_statements(concept, manifest) do
+    {IriBuilder.from_label(concept, manifest), RDF.type(), RDF.iri(SKOS.Concept)}
   end
 
   defp label_statement(label, manifest) do

@@ -10,7 +10,7 @@ defmodule Skout.YAML.DecoderTest do
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
-                  RDF.Graph.new(ex_concept_scheme_statements(),
+                  Graph.new(ex_concept_scheme_statements(),
                     prefixes: %{"" => ex_manifest().base_iri, skos: SKOS}
                   )
               }}
@@ -31,6 +31,47 @@ defmodule Skout.YAML.DecoderTest do
               %Skout.Outline{
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos: ex_skos()
+              }}
+
+    assert decode(
+             """
+             - Foo:
+               - Bar
+               - baz baz:
+                 - qux:
+                   - quux:
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Outline{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos: ex_skos()
+              }}
+
+    assert decode(
+             """
+             - Foo
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Outline{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos:
+                  Graph.new(prefixes: %{"" => ex_base_iri(), skos: SKOS})
+                  |> Graph.add(
+                    ex_base_iri()
+                    |> RDF.type(SKOS.ConceptScheme)
+                    |> SKOS.hasTopConcept(EX.Foo)
+                  )
+                  |> Graph.add(
+                    EX.Foo
+                    |> RDF.type(SKOS.Concept)
+                    |> SKOS.prefLabel(~L"Foo")
+                    |> SKOS.topConceptOf(ex_base_iri())
+                    |> SKOS.inScheme(ex_base_iri())
+                  )
               }}
   end
 
