@@ -23,12 +23,9 @@ defmodule Skout.MixProject do
 
   defp deps do
     [
-      # {:rdf, "~> 0.6.2"},
-      {:rdf, path: "../../../RDF.ex/src/rdf"},
-      # {:sparql, "~> 0.3"},
-      {:sparql, path: "../../../RDF.ex/src/sparql"},
-      #      {:json_ld, "~> 0.3"},
-      {:json_ld, path: "../../../RDF.ex/src/json_ld"},
+      {:rdf, "~> 0.6.2"},
+      {:sparql, "~> 0.3.2"},
+      {:json_ld, "~> 0.3"},
       {:yaml_elixir, "~> 2.4"},
       {:optimus, "~> 0.1"},
     ]
