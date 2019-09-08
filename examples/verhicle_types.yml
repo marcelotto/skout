@@ -1,0 +1,22 @@
+base: http://transport.data.gov.uk/def/vehicle-category/
+concept_scheme:
+  title: Vehicle Types
+  creator: UK Department for Transport
+  isDefinedBy: <http://www.dft.gov.uk/matrix/forms/definitions.aspx>
+  seeAlso: <https://www.jenitennison.com/2009/11/22/creating-linked-data-part-iii-defining-concept-schemes.html>
+---
+- Pedal cycles
+- All motor vehicles:
+  - Two wheeled motor vehicles
+  - Cars and taxis
+  - Buses and coaches
+  - Light vans
+  - All HGV:
+    - Rigid HGV:
+      - HGVr2
+      - HGVr3
+      - HGVr4+
+    - Articulated HGV:
+      - HGVa3/4
+      - HGVa5
+      - HGVa6
