@@ -1,14 +1,17 @@
 defmodule Skout.MixProject do
   use Mix.Project
 
+  @version File.read!("VERSION") |> String.trim()
+
   def project do
     [
       app: :skout,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env()),
+      escript: [main_module: Skout.CLI],
     ]
   end
 
@@ -24,7 +27,10 @@ defmodule Skout.MixProject do
       {:rdf, path: "../../../RDF.ex/src/rdf"},
       # {:sparql, "~> 0.3"},
       {:sparql, path: "../../../RDF.ex/src/sparql"},
-      {:yaml_elixir, "~> 2.4"}
+      #      {:json_ld, "~> 0.3"},
+      {:json_ld, path: "../../../RDF.ex/src/json_ld"},
+      {:yaml_elixir, "~> 2.4"},
+      {:optimus, "~> 0.1"},
     ]
   end
 
