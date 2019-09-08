@@ -51,9 +51,6 @@ defmodule Skout.YAML.Encoder do
     DC.modified(),
     RDFS.isDefinedBy(),
     RDFS.seeAlso(),
-    # Collections
-    SKOS.member(),
-    SKOS.memberList(),
     # Semantic relations
     SKOS.related(),
     SKOS.narrower(),
@@ -62,8 +59,7 @@ defmodule Skout.YAML.Encoder do
     SKOS.closeMatch(),
     SKOS.narrowMatch(),
     SKOS.broadMatch(),
-    SKOS.relatedMatch(),
-    SKOS.mappingRelation()
+    SKOS.relatedMatch()
   ]
 
   @known_properties IriBuilder.known_properties()

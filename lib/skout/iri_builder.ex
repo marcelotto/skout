@@ -13,9 +13,13 @@ defmodule Skout.IriBuilder do
                          :narrowerTransitive,
                          :broaderTransitive,
                          :semanticRelation,
+                         :mappingRelation,
                          :inScheme,
                          :hasTopConcept,
-                         :topConceptOf
+                         :topConceptOf,
+                         # for now, we don't support collections
+                         :member,
+                         :memberList
                        ])
                     |> Enum.map(fn property -> {property, apply(SKOS, property, [])} end)
                     |> Map.new()
