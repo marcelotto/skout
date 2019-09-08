@@ -1,6 +1,8 @@
 defmodule Skout.MixProject do
   use Mix.Project
 
+  @repo_url "https://github.com/marcelotto/skout"
+
   @version File.read!("VERSION") |> String.trim()
 
   def project do
@@ -12,6 +14,37 @@ defmodule Skout.MixProject do
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
       escript: [main_module: Skout.CLI],
+
+      # Hex
+      package: package(),
+      description: description(),
+
+      # Docs
+      name: "Skout",
+      docs: [
+        main: "Skout.Document",
+        source_url: @repo_url,
+        source_ref: "v#{@version}",
+        extras: ["README.md", "CHANGELOG.md"]
+      ]
+    ]
+  end
+
+  defp description do
+    """
+    A terse, opinionated format for SKOS concept schemes.
+    """
+  end
+
+  defp package do
+    [
+      maintainers: ["Marcel Otto"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => @repo_url,
+        "Changelog" => @repo_url <> "/blob/master/CHANGELOG.md"
+      },
+      files: ~w[lib priv mix.exs VERSION *.md]
     ]
   end
 
