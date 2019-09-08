@@ -47,13 +47,13 @@ defmodule Skout.IriBuilder do
     word
     |> String.replace(~r/([A-Z]+)([A-Z][a-z])/, "\\1_\\2")
     |> String.replace(~r/([a-z\d])([A-Z])/, "\\1_\\2")
-    |> String.replace(~r/[-\s\/]/, "_")
+    |> String.replace(~r/[-\+\s\/]/, "_")
     |> String.replace(~r/[#]/, "")
     |> String.downcase()
   end
 
   def camelize(word) do
-    case Regex.split(~r/(?:^|[-_])|(?=[A-Z])|[\s#\/]/, word)
+    case Regex.split(~r/(?:^|[-_])|(?=[A-Z])|[\s#\/\+]/, word)
          |> Enum.filter(&(&1 != "")) do
       [first | words] ->
         [first | camelize_list(words)]
