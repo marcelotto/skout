@@ -1,4 +1,6 @@
 defmodule Skout.CLI do
+  @moduledoc false
+
   alias Skout.Document
 
   @version File.read!("VERSION") |> String.trim()

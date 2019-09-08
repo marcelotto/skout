@@ -1,4 +1,6 @@
 defmodule Skout.YAML.Decoder do
+  @moduledoc false
+
   alias Skout.{Document, Manifest, IriBuilder}
   alias RDF.NS.SKOS
   alias RDF.IRI

@@ -1,4 +1,6 @@
 defmodule Skout.YAML.Encoder do
+  @moduledoc false
+
   alias Skout.{Document, IriBuilder, Materialization}
   alias RDF.NS.{SKOS, RDFS}
   alias Skout.NS.DC

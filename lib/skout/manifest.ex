@@ -1,4 +1,8 @@
 defmodule Skout.Manifest do
+  @moduledoc !"""
+             The settings for the `Skout.Document` serialization to YAML.
+             """
+
   defstruct base_iri: nil,
             iri_normalization: :camelize,
             default_language: nil,

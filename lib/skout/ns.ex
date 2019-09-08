@@ -1,11 +1,13 @@
 defmodule Skout.NS do
+  @moduledoc false
+
   use RDF.Vocabulary.Namespace
 
-  @vocabdoc """
-  The Dublin Core Metadata Terms vocabulary.
+  @vocabdoc !"""
+            The Dublin Core Metadata Terms vocabulary.
 
-  See <http://purl.org/dc/terms/>
-  """
+            See <http://purl.org/dc/terms/>
+            """
   defvocab DC,
     base_iri: "http://purl.org/dc/terms/",
     file: "dct.nt",

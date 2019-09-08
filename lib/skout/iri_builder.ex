@@ -1,4 +1,6 @@
 defmodule Skout.IriBuilder do
+  @moduledoc false
+
   alias Skout.Manifest
   alias Skout.NS.DC
   alias RDF.NS.{SKOS, RDFS}

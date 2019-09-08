@@ -1,5 +1,8 @@
 defmodule Skout.Materialization do
+  @moduledoc false
+
   defmodule Settings do
+    @moduledoc false
     defstruct rdf_type: true,
               in_scheme: true,
               inverse_hierarchy: true,

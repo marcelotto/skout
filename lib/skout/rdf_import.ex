@@ -1,4 +1,6 @@
 defmodule Skout.RDF.Import do
+  @moduledoc false
+
   alias Skout.Document
   alias RDF.NS.SKOS
 
