@@ -46,7 +46,7 @@ defmodule Skout.IriBuilderTest do
 
     test "with a transformation function" do
       assert IriBuilder.from_label("Foo", ex_manifest(iri_normalization: &String.upcase/1)) ==
-        iri(EX.FOO)
+               iri(EX.FOO)
     end
   end
 

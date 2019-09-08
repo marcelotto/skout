@@ -86,25 +86,27 @@ defmodule Skout.YAML.DecoderTest do
              iri_normalization: &String.downcase/1
            ) ==
              {:ok,
-               %Skout.Document{
-                 manifest: ex_manifest(concept_scheme: false,
-                 iri_normalization: &String.downcase/1
-                 ),
-                 skos:
-                   Graph.new(prefixes: default_prefixes())
-                   |> Graph.add(
-                        EX.foo()
-                        |> RDF.type(SKOS.Concept)
-                        |> SKOS.prefLabel(~L"Foo")
-                        |> SKOS.narrower(EX.bar())
-                      )
-                   |> Graph.add(
-                        EX.bar()
-                        |> RDF.type(SKOS.Concept)
-                        |> SKOS.prefLabel(~L"BAR")
-                        |> SKOS.broader(EX.foo())
-                      )
-               }}
+              %Skout.Document{
+                manifest:
+                  ex_manifest(
+                    concept_scheme: false,
+                    iri_normalization: &String.downcase/1
+                  ),
+                skos:
+                  Graph.new(prefixes: default_prefixes())
+                  |> Graph.add(
+                    EX.foo()
+                    |> RDF.type(SKOS.Concept)
+                    |> SKOS.prefLabel(~L"Foo")
+                    |> SKOS.narrower(EX.bar())
+                  )
+                  |> Graph.add(
+                    EX.bar()
+                    |> RDF.type(SKOS.Concept)
+                    |> SKOS.prefLabel(~L"BAR")
+                    |> SKOS.broader(EX.foo())
+                  )
+              }}
   end
 
   test "simple Skout document without hyphens in the hierarchy" do
