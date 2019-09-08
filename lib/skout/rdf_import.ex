@@ -6,7 +6,12 @@ defmodule Skout.RDF.Import do
     with {:ok, concept_scheme} <- determine_concept_scheme(graph, opts),
          concepts = concepts(graph, concept_scheme),
          {:ok, base_iri} <- determine_base_iri(concepts, opts),
-         {:ok, document} <- Document.new(concept_scheme: concept_scheme, base_iri: base_iri),
+         {:ok, document} <-
+           Document.new(
+             opts
+             |> Keyword.put(:concept_scheme, concept_scheme)
+             |> Keyword.put(:base_iri, base_iri)
+           ),
          {:ok, document} <- extract_skos(graph, concepts, document) do
       {:ok, document}
     end
