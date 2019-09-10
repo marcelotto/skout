@@ -109,6 +109,39 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
+  test "simple Skout document using notation as the default label type" do
+    pref_label = SKOS.prefLabel()
+
+    assert decode(
+             """
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux:
+             """,
+             base_iri: ex_base_iri(),
+             label_type: :notation
+           ) ==
+             {:ok,
+              %Skout.Document{
+                manifest:
+                  ex_manifest(
+                    concept_scheme: ex_base_iri(),
+                    label_type: :notation
+                  ),
+                skos:
+                  Graph.new(prefixes: default_prefixes())
+                  |> Graph.add(
+                    ex_skos()
+                    |> Enum.map(fn
+                      {s, ^pref_label, o} -> {s, SKOS.notation(), o}
+                      other -> other
+                    end)
+                  )
+              }}
+  end
+
   test "simple Skout document without hyphens in the hierarchy" do
     assert decode(
              """
@@ -392,6 +425,21 @@ defmodule Skout.YAML.DecoderTest do
                )
 
       assert document.manifest.default_language == nil
+    end
+
+    test "setting the label_type" do
+      assert {:ok, document} =
+               decode(
+                 """
+                 label_type: notation
+                 ---
+                 Foo:
+                   - bar
+                 """,
+                 base_iri: ex_base_iri()
+               )
+
+      assert document.manifest.label_type == :notation
     end
 
     test "setting the iri_normalization" do

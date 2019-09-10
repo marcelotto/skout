@@ -5,6 +5,7 @@ defmodule Skout.Manifest do
 
   defstruct base_iri: nil,
             iri_normalization: :camelize,
+            label_type: :prefLabel,
             default_language: nil,
             materialization: %Skout.Materialization.Settings{},
             # This just serves as a cache to not have query the graph for this all the time
@@ -12,6 +13,7 @@ defmodule Skout.Manifest do
 
   alias Skout.{Materialization, IriBuilder}
   alias RDF.{IRI, Literal}
+  alias RDF.NS.SKOS
 
   import Skout.Helper
 
@@ -37,6 +39,7 @@ defmodule Skout.Manifest do
   defp normalize(manifest) do
     manifest
     |> normalize_base_iri()
+    |> normalize_label_type()
     |> normalize_iri_normalization()
     |> normalize_materialization()
   end
@@ -46,6 +49,13 @@ defmodule Skout.Manifest do
   defp normalize_base_iri(manifest) do
     %__MODULE__{manifest | base_iri: RDF.IRI.coerce_base(manifest.base_iri)}
   end
+
+  defp normalize_label_type(%{label_type: label_type} = manifest)
+       when is_binary(label_type) do
+    %__MODULE__{manifest | label_type: String.to_atom(manifest.label_type)}
+  end
+
+  defp normalize_label_type(manifest), do: manifest
 
   defp normalize_iri_normalization(%{iri_normalization: iri_normalization} = manifest)
        when is_binary(iri_normalization) do
@@ -106,4 +116,7 @@ defmodule Skout.Manifest do
   end
 
   def object_term(string, _, _) when is_binary(string), do: {:ok, RDF.string(string)}
+
+  def label_property(%__MODULE__{label_type: :prefLabel}), do: SKOS.prefLabel()
+  def label_property(%__MODULE__{label_type: :notation}), do: SKOS.notation()
 end

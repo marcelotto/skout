@@ -27,7 +27,9 @@ defmodule Skout.Document do
   - `iri_normalization`: The normalization method which is applied to the labels
     before they are concatenated to the `base_iri`.
     Must be one of `:camelize` or `underscore` and defaults to `camelize`.
-  - `default_language`: The language-tag used for the produced `skos:prefLabel`
+  - `label_type`: The SKOS label property to be used for produced labeling
+    statements.
+  - `default_language`: The language-tag used for the produced labeling
     statements.
   - `materialization`: Another struct with flag settings controlling which
     statements should be materialized.

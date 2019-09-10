@@ -20,6 +20,7 @@ defmodule Skout.YAML.EncoderTest do
               """
               base_iri: #{document.manifest.base_iri}
               iri_normalization: #{document.manifest.iri_normalization}
+              label_type: #{document.manifest.label_type}
               ---
 
               """}
@@ -31,6 +32,7 @@ defmodule Skout.YAML.EncoderTest do
               """
               base_iri: #{@example_document.manifest.base_iri}
               iri_normalization: #{@example_document.manifest.iri_normalization}
+              label_type: #{@example_document.manifest.label_type}
               ---
               Foo:
               - Bar:
@@ -69,6 +71,7 @@ defmodule Skout.YAML.EncoderTest do
               """
               base_iri: #{@example_document.manifest.base_iri}
               iri_normalization: #{@example_document.manifest.iri_normalization}
+              label_type: #{@example_document.manifest.label_type}
               ---
               Foo:
               - :altLabel: [false, true, 3.14, 42]
@@ -106,6 +109,7 @@ defmodule Skout.YAML.EncoderTest do
                 base_iri: #{document.manifest.base_iri}
                 concept_scheme: http://example.com/foo#
                 iri_normalization: #{document.manifest.iri_normalization}
+                label_type: #{document.manifest.label_type}
                 ---
 
                 """}
@@ -122,6 +126,7 @@ defmodule Skout.YAML.EncoderTest do
                 """
                 base_iri: #{document.manifest.base_iri}
                 iri_normalization: #{document.manifest.iri_normalization}
+                label_type: #{document.manifest.label_type}
                 ---
 
                 """}
@@ -154,6 +159,24 @@ defmodule Skout.YAML.EncoderTest do
                   created: 2019
                   definition: A description of a concept scheme
                 iri_normalization: #{document.manifest.iri_normalization}
+                label_type: #{document.manifest.label_type}
+                ---
+
+                """}
+    end
+
+    test "label_type" do
+      document = %Skout.Document{
+        manifest: ex_manifest(label_type: :notation),
+        skos: RDF.Graph.new()
+      }
+
+      assert encode(document) ==
+               {:ok,
+                """
+                base_iri: #{document.manifest.base_iri}
+                iri_normalization: #{document.manifest.iri_normalization}
+                label_type: notation
                 ---
 
                 """}
@@ -167,13 +190,14 @@ defmodule Skout.YAML.EncoderTest do
 
       assert encode(document) ==
                {:ok,
-                """
-                base_iri: #{document.manifest.base_iri}
-                default_language: en
-                iri_normalization: #{document.manifest.iri_normalization}
-                ---
+                 """
+                 base_iri: #{document.manifest.base_iri}
+                 default_language: en
+                 iri_normalization: #{document.manifest.iri_normalization}
+                 label_type: #{document.manifest.label_type}
+                 ---
 
-                """}
+                 """}
     end
   end
 end

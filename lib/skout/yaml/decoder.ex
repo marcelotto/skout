@@ -244,7 +244,7 @@ defmodule Skout.YAML.Decoder do
   defp label_statement(label, manifest) do
     {
       IriBuilder.from_label(label, manifest),
-      SKOS.prefLabel(),
+      Manifest.label_property(manifest),
       Manifest.term_to_literal(label, manifest)
     }
   end
