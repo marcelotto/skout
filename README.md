@@ -204,7 +204,8 @@ As you can see in the example above the concept hierarchy is simply a list of ne
 
 So, how are the IRIs for the concepts created? As stated in the first two assumptions above, the IRIs are concatenations of the base IRI and a normalization of the `skos:prefLabel`. The base IRI is the only required parameter for the translation to RDF and must be preferably provided in the preamble with the `base_iri` field (or its alias `base`) or directly given to the CLI (or the respective Elixir functions). The `skos:prefLabel` used in the concept hierarchy is then normalized by applying a normalization method, which can be configured with the `iri_normalization` field in the preamble. Currently, there are two methods available: `camelize` and `underscore`. If not specified, it defaults to `camelize`. If you are calling the Elixir functions, you can also pass a custom normalization function. 
 
-For each concept in the concept hierarchy an `rdf:type skos:Concept` statement and a `skos:prefLabel` statement is produced in the RDF translation. By default a plain string is used for `skos:prefLabel`, but you can configure a language tag which should be used for all `skos:prefLabel` with the `default_language` field in the preamble.
+For each concept in the concept hierarchy an `rdf:type skos:Concept` statement and a label statement is produced in the RDF translation. The property used for the label statement can be defined with the `label_type` field in the preamble. 
+Possible values are `prefLabel`, which will use `skos:prefLabel` for the label statements and is the default, or `notation` for the `skos:notation` property. By default a plain string is used for the object of the label statement, but you can configure a language tag which should be used with the `default_language` field in the preamble.
 
 The nesting of the concepts will be translated to both `skos:narrower` and `skos:broader` statements accordingly. 
 
@@ -245,6 +246,7 @@ It is possible to add statements about the concepts with a limited set of proper
 | Property                | Term              |
 | :---------------------- | :---------------- |
 | `skos:related`          | `related`         |
+| `skos:prefLabel`        | `prefLabel`       |
 | `skos:altLabel`         | `altLabel`        |
 | `skos:hiddenLabel`      | `hiddenLabel`     |
 | `skos:notation`         | `notation`        |
