@@ -8,7 +8,6 @@ defmodule Skout.IriBuilder do
 
   @known_properties (Skout.Helper.properties(SKOS) --
                        [
-                         :prefLabel,
                          :broader,
                          :narrowerTransitive,
                          :broaderTransitive,

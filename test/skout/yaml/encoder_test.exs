@@ -90,6 +90,38 @@ defmodule Skout.YAML.EncoderTest do
               """}
   end
 
+  test "Skout document with non-default label_type" do
+    assert encode(
+             Skout.Document.new!(ex_manifest(label_type: :notation))
+             |> Skout.Document.update_graph(fn skos ->
+               skos
+               |> Graph.add(
+                 EX.Foo
+                 |> RDF.type(SKOS.Concept)
+                 |> SKOS.notation(~L"Foo")
+                 |> SKOS.prefLabel(~L"FooBar")
+                 |> SKOS.inScheme(ex_base_iri())
+                 |> SKOS.topConceptOf(ex_base_iri())
+               )
+               |> Graph.add(
+                 ex_base_iri()
+                 |> RDF.type(SKOS.ConceptScheme)
+                 |> SKOS.hasTopConcept(EX.Foo)
+               )
+             end)
+           ) ==
+             {:ok,
+              """
+              base_iri: #{@example_document.manifest.base_iri}
+              iri_normalization: #{@example_document.manifest.iri_normalization}
+              label_type: notation
+              ---
+              Foo:
+              - :prefLabel: FooBar
+
+              """}
+  end
+
   test "Skout document with circles" do
     assert_raise RuntimeError, ~r/concept scheme contains a circle/, fn ->
       encode(document_with_circle())

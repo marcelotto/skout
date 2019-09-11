@@ -1,7 +1,7 @@
 defmodule Skout.YAML.Encoder do
   @moduledoc false
 
-  alias Skout.{Document, IriBuilder, Materialization}
+  alias Skout.{Document, Manifest, IriBuilder, Materialization}
   alias RDF.NS.{SKOS, RDFS}
   alias Skout.NS.DC
   alias RDF.{Graph, Description, IRI, Literal}
@@ -11,6 +11,7 @@ defmodule Skout.YAML.Encoder do
     RDF.type(),
     RDFS.subClassOf(),
     # Lexical labels
+    SKOS.prefLabel(),
     SKOS.altLabel(),
     SKOS.hiddenLabel(),
     SKOS.notation(),
@@ -35,6 +36,7 @@ defmodule Skout.YAML.Encoder do
     RDF.type(),
     RDFS.subClassOf(),
     # Lexical labels
+    SKOS.prefLabel(),
     SKOS.altLabel(),
     SKOS.hiddenLabel(),
     SKOS.notation(),
@@ -182,7 +184,7 @@ defmodule Skout.YAML.Encoder do
   defp concept(concept, document, depth, visited, opts) do
     description = Graph.description(document.skos, concept)
 
-    concept_label(concept, description) <>
+    concept_label(concept, description, document) <>
       ":\n" <>
       Enum.map_join(@concept_description_blueprint, fn property ->
         statement(concept, property, description, document, depth, visited, opts)
@@ -191,18 +193,22 @@ defmodule Skout.YAML.Encoder do
 
   defp concept_label(concept, %Document{} = document) do
     if description = Graph.description(document.skos, concept) do
-      concept_label(concept, description)
+      concept_label(concept, description, document)
     end
   end
 
-  defp concept_label(concept, %Description{} = description) do
+  defp concept_label(concept, %Description{} = description, document) do
+    label_type = Manifest.label_property(document.manifest)
+
     description
-    |> Description.get(SKOS.prefLabel())
+    |> Description.get(label_type)
     |> case do
-      nil -> raise "Missing label for concept #{concept}"
-      [label] -> to_string(label)
+      nil -> raise "Missing #{label_type} label for concept #{concept}"
+      labels -> labels |> select_label() |> to_string()
     end
   end
+
+  def select_label([label | _]), do: label
 
   defp statement(subject, property, description, document, depth, visited, opts) do
     if objects = Description.get(description, property) do
@@ -241,8 +247,14 @@ defmodule Skout.YAML.Encoder do
   end
 
   defp do_statement(_, property, objects, document, depth, _, opts) do
-    generic_statement(property, objects, document, depth, opts)
+    if property == Manifest.label_property(document.manifest) do
+      generic_statement(property, objects -- [select_label(objects)], document, depth, opts)
+    else
+      generic_statement(property, objects, document, depth, opts)
+    end
   end
+
+  defp generic_statement(_, [], _, _, _), do: ""
 
   defp generic_statement(property, objects, document, depth, opts) do
     if key = Map.get(@known_properties, property) do

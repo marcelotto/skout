@@ -14,6 +14,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   for now only `:prefLabel` (the default) and `notation` are allowed
 
 
+### Changed
+
+- It's possible now to use the property which is used in the production of the
+  label statements for the terms in the hierarchy (before always `skos:prefLabel`,   
+  but now also `skos:notation`) in the term descriptions to specify further labels 
+  of the resp. type, but beware that during simply the first one is selected as
+  the one to be used in the hierarchy and since the objects are unordered this
+  selection is non-deterministic.
+
+
 [Compare v0.1.0...HEAD](https://github.com/marcelotto/skout/compare/v0.1....HEAD)
 
 
