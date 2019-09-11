@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.1 - 2019-09-12
 
 ### Added 
 
@@ -26,7 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   previously `skos:prefLabel` wasn't 
 
 
-[Compare v0.1.0...HEAD](https://github.com/marcelotto/skout/compare/v0.1....HEAD)
+[Compare v0.1.0...v0.1.1](https://github.com/marcelotto/skout/compare/v0.1.0...v0.1.1)
 
 
 
