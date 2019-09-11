@@ -184,20 +184,20 @@ defmodule Skout.YAML.Encoder do
   defp concept(concept, document, depth, visited, opts) do
     description = Graph.description(document.skos, concept)
 
-    concept_label(concept, description, document) <>
+    concept_label(concept, description, document, opts) <>
       ":\n" <>
       Enum.map_join(@concept_description_blueprint, fn property ->
         statement(concept, property, description, document, depth, visited, opts)
       end)
   end
 
-  defp concept_label(concept, %Document{} = document) do
+  defp concept_label(concept, %Document{} = document, opts) do
     if description = Graph.description(document.skos, concept) do
-      concept_label(concept, description, document)
+      concept_label(concept, description, document, opts)
     end
   end
 
-  defp concept_label(concept, %Description{} = description, document) do
+  defp concept_label(concept, %Description{} = description, document, _opts) do
     label_type = Manifest.label_property(document.manifest)
 
     description
@@ -247,7 +247,8 @@ defmodule Skout.YAML.Encoder do
   end
 
   defp do_statement(_, property, objects, document, depth, _, opts) do
-    if property == Manifest.label_property(document.manifest) do
+    if property == Manifest.label_property(document.manifest) and
+         Keyword.get(opts, :property_term_style) != :concept_scheme_description do
       generic_statement(property, objects -- [select_label(objects)], document, depth, opts)
     else
       generic_statement(property, objects, document, depth, opts)
@@ -288,8 +289,8 @@ defmodule Skout.YAML.Encoder do
     end
   end
 
-  defp object_term(%IRI{} = object, _, document, _opts) do
-    label = concept_label(object, document)
+  defp object_term(%IRI{} = object, _, document, opts) do
+    label = concept_label(object, document, opts)
 
     if label && to_string(object) == to_string(document.manifest.base_iri) <> label do
       ":#{label}"

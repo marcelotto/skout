@@ -200,13 +200,46 @@ defmodule Skout.YAML.EncoderTest do
     test "label_type" do
       document = %Skout.Document{
         manifest: ex_manifest(label_type: :notation),
-        skos: RDF.Graph.new()
+        skos:
+          Graph.new()
+          |> Graph.add(
+            ex_base_iri()
+            |> SKOS.prefLabel(~L"Foo")
+            |> SKOS.notation(~L"bar")
+          )
       }
 
       assert encode(document) ==
                {:ok,
                 """
                 base_iri: #{document.manifest.base_iri}
+                iri_normalization: #{document.manifest.iri_normalization}
+                label_type: notation
+                ---
+
+                """}
+    end
+
+    test "labels for the concept scheme" do
+      document = %Skout.Document{
+        manifest: ex_manifest(label_type: :notation, concept_scheme: ex_base_iri()),
+        skos:
+          Graph.new()
+          |> Graph.add(
+            ex_base_iri()
+            |> SKOS.prefLabel(~L"Foo")
+            |> SKOS.notation(~L"bar")
+          )
+      }
+
+      assert encode(document) ==
+               {:ok,
+                """
+                base_iri: #{document.manifest.base_iri}
+                concept_scheme:
+                  id: #{document.manifest.base_iri}
+                  prefLabel: Foo
+                  notation: bar
                 iri_normalization: #{document.manifest.iri_normalization}
                 label_type: notation
                 ---
@@ -222,14 +255,14 @@ defmodule Skout.YAML.EncoderTest do
 
       assert encode(document) ==
                {:ok,
-                 """
-                 base_iri: #{document.manifest.base_iri}
-                 default_language: en
-                 iri_normalization: #{document.manifest.iri_normalization}
-                 label_type: #{document.manifest.label_type}
-                 ---
+                """
+                base_iri: #{document.manifest.base_iri}
+                default_language: en
+                iri_normalization: #{document.manifest.iri_normalization}
+                label_type: #{document.manifest.label_type}
+                ---
 
-                 """}
+                """}
     end
   end
 end

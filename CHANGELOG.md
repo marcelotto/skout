@@ -22,6 +22,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   of the resp. type, but beware that during simply the first one is selected as
   the one to be used in the hierarchy and since the objects are unordered this
   selection is non-deterministic.
+- all types of SKOS labels are now supported for concept schemes; 
+  previously `skos:prefLabel` wasn't 
 
 
 [Compare v0.1.0...HEAD](https://github.com/marcelotto/skout/compare/v0.1....HEAD)

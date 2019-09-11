@@ -334,6 +334,7 @@ defmodule Skout.YAML.DecoderTest do
       assert """
              concept_scheme:
                id: <http://other_example.com>
+               prefLabel: Example
                title: An example concept scheme
                definition: "A description of a concept scheme"
                creator: John Doe
@@ -350,6 +351,7 @@ defmodule Skout.YAML.DecoderTest do
                       ~I<http://other_example.com>
                       |> RDF.type(SKOS.ConceptScheme)
                       |> DC.title(~L"An example concept scheme")
+                      |> SKOS.prefLabel(~L"Example")
                       |> SKOS.definition(~L"A description of a concept scheme")
                       |> DC.creator(~L"John Doe")
                       |> DC.created(RDF.integer(2019)),
