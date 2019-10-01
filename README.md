@@ -6,13 +6,15 @@
 
 A terse, opinionated format for [SKOS] concept schemes as outlines in YAML.
 
-If you're looking for a way to manage huge concept schemes this won't be the right tool for you. But if you want a developer-friendly and easy to maintain solution to write small and simple SKOS concept schemes or lay out the foundation for a larger one, this might be what you're looking for: 
+If you're looking for a way to manage huge concept schemes this won't be the right tool for you. But if you want a developer-friendly and easy solution for writing small and simple SKOS concept schemes or laying out the foundation for a larger one, this might be what you're looking for: 
 
 - easy to read, write and edit concept hierarchies
 - auto-generated boilerplate statements about concepts
 
 
 ## Example
+
+This Skout document:
 
 ```yaml
 base: http://transport.data.gov.uk/def/vehicle-category/
@@ -38,8 +40,9 @@ iri_normalization: camelize
       - HGVa3/4
       - HGVa5
       - HGVa6
-
 ```
+
+produces these RDF statements:
 
 ```turtle
 @prefix : <http://transport.data.gov.uk/def/vehicle-category/> .
