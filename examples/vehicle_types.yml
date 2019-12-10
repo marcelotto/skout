@@ -4,6 +4,7 @@ concept_scheme:
   creator: UK Department for Transport
   isDefinedBy: <http://www.dft.gov.uk/matrix/forms/definitions.aspx>
   seeAlso: <https://www.jenitennison.com/2009/11/22/creating-linked-data-part-iii-defining-concept-schemes.html>
+iri_normalization: camelize
 ---
 - Pedal cycles
 - All motor vehicles:

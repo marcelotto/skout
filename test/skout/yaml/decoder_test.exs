@@ -4,6 +4,13 @@ defmodule Skout.YAML.DecoderTest do
 
   import Skout.YAML.Decoder, only: [decode: 1, decode: 2]
 
+  test "README example" do
+    assert {:ok, %Skout.Document{}} =
+             "examples/vehicle_types.yml"
+             |> File.read!()
+             |> decode()
+  end
+
   test "empty Skout document" do
     assert decode("", base_iri: ex_base_iri()) ==
              {:ok,

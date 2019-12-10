@@ -25,12 +25,12 @@ concept_scheme:
   seeAlso: <https://www.jenitennison.com/2009/11/22/creating-linked-data-part-iii-defining-concept-schemes.html>
 iri_normalization: camelize  
 ---
-- Pedal cycles:
+- Pedal cycles
 - All motor vehicles:
-  - Two wheeled motor vehicles:
-  - Cars and taxis:
-  - Buses and coaches:
-  - Light vans:
+  - Two wheeled motor vehicles
+  - Cars and taxis
+  - Buses and coaches
+  - Light vans
   - All HGV:
     - Rigid HGV:
       - HGVr2
@@ -375,7 +375,7 @@ $ skout input.yml output.ttl
 $ skout input.nt output.yml
 ```
 
-Run `skout --help` to see all options.
+Run `skout --help` to see all available options.
 
 
 
