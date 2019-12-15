@@ -56,7 +56,7 @@ defmodule Skout.MixProject do
 
   defp deps do
     [
-      {:rdf, "~> 0.6.2"},
+      {:rdf, "~> 0.7"},
       {:sparql, "~> 0.3.2"},
       {:json_ld, "~> 0.3"},
       {:yaml_elixir, "~> 2.4"},
