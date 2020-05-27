@@ -20,6 +20,8 @@ defmodule Skout.Test.Case do
       import unquote(__MODULE__)
 
       import RDF.Sigils
+
+      @compile {:no_warn_undefined, Skout.Test.Case.EX}
     end
   end
 end
