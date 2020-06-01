@@ -282,7 +282,7 @@ defmodule Skout.YAML.DecoderTest do
                   |> SKOS.prefLabel(~L"Foo")
                   |> SKOS.definition(~L"A foo is a ...")
                   |> SKOS.related(EX.Bar)
-                  |> SKOS.notation(RDF.true(), RDF.integer(42))
+                  |> SKOS.notation(XSD.true(), XSD.integer(42))
                   |> RDFS.seeAlso(
                     ~I<http://example.com/other/Foo>,
                     ~I<http://example.com/other/Bar>
@@ -361,7 +361,7 @@ defmodule Skout.YAML.DecoderTest do
                       |> SKOS.prefLabel(~L"Example")
                       |> SKOS.definition(~L"A description of a concept scheme")
                       |> DC.creator(~L"John Doe")
-                      |> DC.created(RDF.integer(2019)),
+                      |> DC.created(XSD.integer(2019)),
                       prefixes: default_prefixes()
                     )
                 }}

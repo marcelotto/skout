@@ -10,7 +10,7 @@ defmodule Skout.Test.Case do
 
   using do
     quote do
-      alias RDF.{Graph, Description, IRI}
+      alias RDF.{Graph, Description, IRI, XSD, NS}
       alias RDF.NS.{SKOS, RDFS, OWL}
       alias Skout.NS.DC
       alias unquote(__MODULE__).EX

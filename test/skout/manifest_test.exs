@@ -40,13 +40,13 @@ defmodule Skout.ManifestTest do
     end
 
     test "with an number" do
-      assert Manifest.object_term(42, SKOS.notation(), ex_manifest()) == {:ok, RDF.integer(42)}
-      assert Manifest.object_term(3.14, SKOS.notation(), ex_manifest()) == {:ok, RDF.double(3.14)}
+      assert Manifest.object_term(42, SKOS.notation(), ex_manifest()) == {:ok, XSD.integer(42)}
+      assert Manifest.object_term(3.14, SKOS.notation(), ex_manifest()) == {:ok, XSD.double(3.14)}
     end
 
     test "with an boolean" do
-      assert Manifest.object_term(true, SKOS.notation(), ex_manifest()) == {:ok, RDF.true()}
-      assert Manifest.object_term(false, SKOS.notation(), ex_manifest()) == {:ok, RDF.false()}
+      assert Manifest.object_term(true, SKOS.notation(), ex_manifest()) == {:ok, XSD.true()}
+      assert Manifest.object_term(false, SKOS.notation(), ex_manifest()) == {:ok, XSD.false()}
     end
 
     test "with a string in angle brackets" do
@@ -68,7 +68,7 @@ defmodule Skout.ManifestTest do
 
     test "with any other string" do
       assert Manifest.object_term("Foo", SKOS.definition(), ex_manifest()) ==
-               {:ok, RDF.string("Foo")}
+               {:ok, XSD.string("Foo")}
     end
   end
 end

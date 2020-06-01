@@ -174,7 +174,7 @@ defmodule Skout.YAML.EncoderTest do
             |> DC.title(~L"An example concept scheme")
             |> SKOS.definition(~L"A description of a concept scheme")
             |> DC.creator(~L"John Doe")
-            |> DC.created(RDF.integer(2019))
+            |> DC.created(XSD.integer(2019))
             # This is an unknown property and should be ignored.
             |> EX.foo(42)
           )

@@ -12,7 +12,7 @@ defmodule Skout.Manifest do
             concept_scheme: nil
 
   alias Skout.{Materialization, IriBuilder}
-  alias RDF.{IRI, Literal}
+  alias RDF.{IRI, Literal, XSD}
   alias RDF.NS.SKOS
 
   import Skout.Helper
@@ -47,7 +47,7 @@ defmodule Skout.Manifest do
   defp normalize_base_iri(%{base_iri: nil} = manifest), do: manifest
 
   defp normalize_base_iri(manifest) do
-    %__MODULE__{manifest | base_iri: RDF.IRI.coerce_base(manifest.base_iri)}
+    %__MODULE__{manifest | base_iri: IRI.coerce_base(manifest.base_iri)}
   end
 
   defp normalize_label_type(%{label_type: label_type} = manifest)
@@ -87,7 +87,7 @@ defmodule Skout.Manifest do
   def object_term(%IRI{} = literal, _, _), do: {:ok, literal}
   def object_term(%Literal{} = literal, _, _), do: {:ok, literal}
 
-  def object_term(object, _, _) when is_boolean(object), do: {:ok, RDF.boolean(object)}
+  def object_term(object, _, _) when is_boolean(object), do: {:ok, XSD.boolean(object)}
   def object_term(object, _, _) when is_number(object), do: {:ok, RDF.literal(object)}
 
   def object_term("<" <> iri_string, _, _) do
@@ -115,7 +115,7 @@ defmodule Skout.Manifest do
     {:ok, IriBuilder.from_label(concept, manifest)}
   end
 
-  def object_term(string, _, _) when is_binary(string), do: {:ok, RDF.string(string)}
+  def object_term(string, _, _) when is_binary(string), do: {:ok, XSD.string(string)}
 
   def label_property(%__MODULE__{label_type: :prefLabel}), do: SKOS.prefLabel()
   def label_property(%__MODULE__{label_type: :notation}), do: SKOS.notation()
