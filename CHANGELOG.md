@@ -5,12 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.3 - 2020-06-02
 
-This version just upgrades to RDF.ex 0.8.  
+- Upgrade to RDF.ex 0.8
 
 
-[Compare v0.1.2...HEAD](https://github.com/marcelotto/skout/compare/v0.1.2...HEAD)
+[Compare v0.1.2...v0.1.3](https://github.com/marcelotto/skout/compare/v0.1.2...v0.1.3)
 
 
 
