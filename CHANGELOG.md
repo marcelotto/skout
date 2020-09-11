@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.4 - 2020-09-11
 
 ### Added 
 
@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   with a class, which every defined concept should be typed with
 
 
-[Compare v0.1.3...HEAD](https://github.com/marcelotto/skout/compare/v0.1.3...HEAD)
+[Compare v0.1.3...v0.1.4](https://github.com/marcelotto/skout/compare/v0.1.3...v0.1.4)
 
 
 
