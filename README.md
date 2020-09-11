@@ -161,7 +161,7 @@ Skout is written in Elixir. This means you'll have to have [Elixir installed](ht
 
 ```sh
 $ mix escript.install github marcelotto/skout
-``` 
+```
 
 After installation, the escript can be invoked as
 
@@ -340,7 +340,7 @@ concept_scheme:
 ---
 Foo:
 - Bar baz
-``` 
+```
 
 This will be translated now to these RDF statements:
 
@@ -381,7 +381,24 @@ $ skout input.nt output.yml
 
 Run `skout --help` to see all available options.
 
+### Docker
 
+Assuming Docker and docker-compose are installed, you can avoid installing Elixir building a Docker image to run Skout in a Docker container. 
+
+You can build the image using one of the following commands. It is possible customize the image tag in the command or in the docker-compose.
+```sh
+$ docker build -t myrepository/skout .
+```
+or
+```
+$ docker-compose build
+```
+The repository also contains a docker-compose configured to run the example in the _examples_ folder. In the provided docker-compose, the _examples_ folder is mounted as a volume, so the output file can be found there. It is possible to customize the docker-compose modifying the mounted folder and the commands executed.
+
+To run the example you can simply use the command:
+```sh
+$ docker-compose up
+```
 
 ## Contributing
 

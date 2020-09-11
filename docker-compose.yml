@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  skout: 
+    image: myrepository/skout:latest
+    build:
+      context: ./
+    working_dir: /usr/src/myapp
+    volumes:
+      - ./examples:/usr/src/myapp
+    entrypoint: ["skout", "vehicle_types.yml", "output.ttl"]
