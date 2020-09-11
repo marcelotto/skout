@@ -187,6 +187,85 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
+  test "Skout document with additional_concept_class" do
+    additional_class = RDF.iri(to_string(ex_base_iri()) <> "Class")
+
+    expected_skos =
+      ex_skos([
+        {EX.Foo, RDF.type(), additional_class},
+        {EX.Bar, RDF.type(), additional_class},
+        {EX.bazBaz(), RDF.type(), additional_class},
+        {EX.qux(), RDF.type(), additional_class},
+        {EX.quux(), RDF.type(), additional_class}
+      ])
+
+    assert decode(
+             """
+             additional_concept_class: <#{to_string(additional_class)}>
+             ---
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Document{
+                manifest:
+                  ex_manifest(
+                    concept_scheme: ex_base_iri(),
+                    additional_concept_class: additional_class
+                  ),
+                skos: expected_skos
+              }}
+
+    assert decode(
+             """
+             additional_concept_class: #{to_string(additional_class)}
+             ---
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Document{
+                manifest:
+                  ex_manifest(
+                    concept_scheme: ex_base_iri(),
+                    additional_concept_class: additional_class
+                  ),
+                skos: expected_skos
+              }}
+
+    assert decode(
+             """
+             additional_concept_class: Class
+             ---
+             Foo:
+             - Bar
+             - baz baz:
+               - qux:
+                 - quux
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Document{
+                manifest:
+                  ex_manifest(
+                    concept_scheme: ex_base_iri(),
+                    additional_concept_class: additional_class
+                  ),
+                skos: expected_skos
+              }}
+  end
+
   test "Skout document with concept description with known properties" do
     assert decode(
              """

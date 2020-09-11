@@ -9,7 +9,8 @@ defmodule Skout.Manifest do
             default_language: nil,
             materialization: %Skout.Materialization.Settings{},
             # This just serves as a cache to not have query the graph for this all the time
-            concept_scheme: nil
+            concept_scheme: nil,
+            additional_concept_class: nil
 
   alias Skout.{Materialization, IriBuilder}
   alias RDF.{IRI, Literal, XSD}
@@ -41,6 +42,7 @@ defmodule Skout.Manifest do
     |> normalize_base_iri()
     |> normalize_label_type()
     |> normalize_iri_normalization()
+    |> normalize_additional_concept_class()
     |> normalize_materialization()
   end
 
@@ -56,6 +58,28 @@ defmodule Skout.Manifest do
   end
 
   defp normalize_label_type(manifest), do: manifest
+
+  defp normalize_additional_concept_class(%{additional_concept_class: nil} = manifest),
+    do: manifest
+
+  defp normalize_additional_concept_class(%{additional_concept_class: "<" <> iri} = manifest) do
+    %__MODULE__{
+      manifest
+      | additional_concept_class: iri |> String.slice(0..-2) |> IRI.new()
+    }
+  end
+
+  defp normalize_additional_concept_class(manifest) do
+    %__MODULE__{
+      manifest
+      | additional_concept_class:
+          if IRI.absolute?(manifest.additional_concept_class) do
+            IRI.new(manifest.additional_concept_class)
+          else
+            IriBuilder.from_label(manifest.additional_concept_class, manifest)
+          end
+    }
+  end
 
   defp normalize_iri_normalization(%{iri_normalization: iri_normalization} = manifest)
        when is_binary(iri_normalization) do

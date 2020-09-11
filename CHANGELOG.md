@@ -5,6 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## Unreleased
+
+### Added 
+
+- new Document configuration `additional_concept_class` which can be set in the preamble
+  with a class, which every defined concept should be typed with
+
+
+[Compare v0.1.3...HEAD](https://github.com/marcelotto/skout/compare/v0.1.3...HEAD)
+
+
+
 ## v0.1.3 - 2020-06-02
 
 - Upgrade to RDF.ex 0.8

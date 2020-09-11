@@ -210,6 +210,8 @@ So, how are the IRIs for the concepts created? As stated in the first two assump
 For each concept in the concept hierarchy an `rdf:type skos:Concept` statement and a label statement is produced in the RDF translation. The property used for the label statement can be defined with the `label_type` field in the preamble. 
 Possible values are `prefLabel`, which will use `skos:prefLabel` for the label statements and is the default, or `notation` for the `skos:notation` property. By default a plain string is used for the object of the label statement, but you can configure a language tag which should be used with the `default_language` field in the preamble.
 
+If you want to add an additional class (above `skos:Concept`) to all defined concepts, you can do so with the `additional_concept_class` field in the preamble.
+
 The nesting of the concepts will be translated to both `skos:narrower` and `skos:broader` statements accordingly. 
 
 So, all in all, this Skout document:
@@ -220,6 +222,7 @@ base_iri: http://example.com/
 default_language: en
 iri_normalization: underscore
 concept_scheme: false
+additional_concept_class: http://other.example.com/Class
 ---
 Foo:
 - Bar baz
@@ -232,15 +235,16 @@ would be translated to these RDF statements:
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 :bar_baz
-    a skos:Concept ;
+    a skos:Concept, <http://other.example.com/Class> ;
     skos:broader :foo ;
     skos:prefLabel "Bar baz"@en .
 
 :foo
-    a skos:Concept ;
+    a skos:Concept, <http://other.example.com/Class> ;
     skos:narrower :bar_baz ;
     skos:prefLabel "Foo"@en .
 ```
+
 
 ### Concept descriptions
 

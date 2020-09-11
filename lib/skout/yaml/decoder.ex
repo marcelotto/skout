@@ -147,8 +147,6 @@ defmodule Skout.YAML.Decoder do
 
   defp add_concept(document, concept, _) do
     with {:ok, document} <-
-           Document.add(document, label_statement(concept, document.manifest)),
-         {:ok, document} <-
            Document.add(document, concept_statements(concept, document.manifest)) do
       {:ok, :description, document}
     end
@@ -182,9 +180,9 @@ defmodule Skout.YAML.Decoder do
 
   defp add_concept(document, concept, narrower, _) do
     with {:ok, document} <-
-           Document.add(document, label_statement(concept, document.manifest)),
+           Document.add(document, concept_statements(concept, document.manifest)),
          {:ok, document} <-
-           Document.add(document, label_statement(narrower, document.manifest)),
+           Document.add(document, concept_statements(narrower, document.manifest)),
          {:ok, document} <-
            Document.add(document, narrower_statement(concept, narrower, document.manifest)) do
       {:ok, :hierarchy, document}
@@ -237,16 +235,21 @@ defmodule Skout.YAML.Decoder do
     {concept_scheme_iri, RDF.type(), SKOS.ConceptScheme}
   end
 
-  defp concept_statements(concept, manifest) do
-    {IriBuilder.from_label(concept, manifest), RDF.type(), RDF.iri(SKOS.Concept)}
-  end
-
-  defp label_statement(label, manifest) do
-    {
-      IriBuilder.from_label(label, manifest),
-      Manifest.label_property(manifest),
-      Manifest.term_to_literal(label, manifest)
-    }
+  defp concept_statements(label, manifest) do
+    [
+      {IriBuilder.from_label(label, manifest), RDF.type(), RDF.iri(SKOS.Concept)},
+      {
+        IriBuilder.from_label(label, manifest),
+        Manifest.label_property(manifest),
+        Manifest.term_to_literal(label, manifest)
+      }
+      | if(manifest.additional_concept_class,
+          do:
+            {IriBuilder.from_label(label, manifest), RDF.type(),
+             manifest.additional_concept_class}
+        )
+        |> List.wrap()
+    ]
   end
 
   defp narrower_statement(a, b, manifest) do
