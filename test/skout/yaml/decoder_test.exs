@@ -23,6 +23,43 @@ defmodule Skout.YAML.DecoderTest do
               }}
   end
 
+  test "flat Skout document" do
+    assert decode(
+             """
+             base: http://foo.com/
+             ---
+             Foo:
+             Bar:
+             """,
+             base_iri: ex_base_iri()
+           ) ==
+             {:ok,
+              %Skout.Document{
+                manifest: ex_manifest(concept_scheme: ex_base_iri()),
+                skos:
+                  Graph.new(prefixes: default_prefixes())
+                  |> Graph.add(
+                    ex_base_iri()
+                    |> RDF.type(SKOS.ConceptScheme)
+                    |> SKOS.hasTopConcept(EX.Foo, EX.Bar)
+                  )
+                  |> Graph.add(
+                    EX.Foo
+                    |> RDF.type(SKOS.Concept)
+                    |> SKOS.prefLabel(~L"Foo")
+                    |> SKOS.topConceptOf(ex_base_iri())
+                    |> SKOS.inScheme(ex_base_iri())
+                  )
+                  |> Graph.add(
+                    EX.Bar
+                    |> RDF.type(SKOS.Concept)
+                    |> SKOS.prefLabel(~L"Bar")
+                    |> SKOS.topConceptOf(ex_base_iri())
+                    |> SKOS.inScheme(ex_base_iri())
+                  )
+              }}
+  end
+
   test "simple Skout document" do
     assert decode(
              """

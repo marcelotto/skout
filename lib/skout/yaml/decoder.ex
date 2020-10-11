@@ -114,6 +114,10 @@ defmodule Skout.YAML.Decoder do
 
   defp build_skos(document, map, opts) do
     Enum.reduce_while(map, {:ok, document}, fn
+      {concept, nil}, {:ok, document} ->
+        add_concept(document, concept, opts)
+        |> cont_or_halt()
+
       {concept, children}, {:ok, document} ->
         Enum.reduce_while(children, {:ok, document}, fn
           hierarchy, {:ok, document} when is_map(hierarchy) ->

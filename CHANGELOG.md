@@ -5,6 +5,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## Unreleased
+
+### Fixed
+
+- fix handling of YAML document with flat concept list
+
+
+[Compare v0.1.4...HEAD](https://github.com/marcelotto/skout/compare/v0.1.4...HEAD)
+
+
+
 ## v0.1.4 - 2020-09-11
 
 ### Added 
