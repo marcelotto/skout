@@ -1,6 +1,6 @@
 # Skout
 
-[![Travis](https://img.shields.io/travis/marcelotto/skout.svg?style=flat-square)](https://travis-ci.org/marcelotto/skout)
+[![CI](https://github.com/marcelotto/skout/workflows/CI/badge.svg?branch=master)](https://github.com/marcelotto/skout/actions?query=branch%3Amaster+workflow%3ACI)
 [![Hex.pm](https://img.shields.io/hexpm/v/skout.svg?style=flat-square)](https://hex.pm/packages/skout)
 
 
