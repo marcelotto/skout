@@ -158,7 +158,7 @@ defmodule Skout.YAML.Encoder do
     |> Enum.filter(fn {_, predicate, _} -> predicate in filtered_properties end)
     |> case do
       [] -> Description.new(subject)
-      triples -> Description.new(triples)
+      triples -> Description.new(subject, init: triples)
     end
   end
 
