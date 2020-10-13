@@ -5,14 +5,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## v0.1.5 - 2020-10-13
+
+- Upgrade to RDF.ex 0.9
+
 
 ### Fixed
 
 - fix handling of YAML document with flat concept list
 
 
-[Compare v0.1.4...HEAD](https://github.com/marcelotto/skout/compare/v0.1.4...HEAD)
+[Compare v0.1.4...v0.1.5](https://github.com/marcelotto/skout/compare/v0.1.4...v0.1.5)
 
 
 
