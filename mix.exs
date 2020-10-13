@@ -61,7 +61,7 @@ defmodule Skout.MixProject do
       {:json_ld, "~> 0.3.3"},
       {:yaml_elixir, "~> 2.4"},
       {:optimus, "~> 0.1"},
-      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.23", only: :dev, runtime: false}
     ]
   end
 
