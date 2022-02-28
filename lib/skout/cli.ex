@@ -86,9 +86,7 @@ defmodule Skout.CLI do
           short: "-i",
           long: "--input_type",
           help:
-            "The input type which might be required if it can not be inferred from the input file extension (one of #{
-              Enum.join(@file_types, ", ")
-            }",
+            "The input type which might be required if it can not be inferred from the input file extension (one of #{Enum.join(@file_types, ", ")}",
           parser: :string,
           required: false
         ],
@@ -97,9 +95,7 @@ defmodule Skout.CLI do
           short: "-o",
           long: "--output_type",
           help:
-            "The output type which might be required if it can not be inferred from the output file extension (one of #{
-              Enum.join(@file_types, ", ")
-            }",
+            "The output type which might be required if it can not be inferred from the output file extension (one of #{Enum.join(@file_types, ", ")}",
           parser: :string,
           required: false
         ],

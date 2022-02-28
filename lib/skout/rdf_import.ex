@@ -168,9 +168,7 @@ defmodule Skout.RDF.Import do
 
       concept_schemes ->
         {:error,
-         "could not determine a unique skos:ConceptScheme: found #{
-           Enum.join(concept_schemes, ", ")
-         }. Please provide one with the :concept_scheme option"}
+         "could not determine a unique skos:ConceptScheme: found #{Enum.join(concept_schemes, ", ")}. Please provide one with the :concept_scheme option"}
     end
   end
 end

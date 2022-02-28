@@ -72,12 +72,7 @@ defmodule Skout.YAML.Encoder do
          |> Enum.empty?() do
     raise """
     The following known properties are missing in the concept description blueprint:
-    - #{
-      @known_properties
-      |> Map.drop(@concept_description_blueprint)
-      |> Enum.map(fn {property, _} -> to_string(property) end)
-      |> Enum.join("\n- ")
-    }
+    - #{@known_properties |> Map.drop(@concept_description_blueprint) |> Enum.map(fn {property, _} -> to_string(property) end) |> Enum.join("\n- ")}
     """
   end
 
@@ -175,9 +170,7 @@ defmodule Skout.YAML.Encoder do
       |> Enum.map(fn concept -> concept(concept, document, depth, visited, opts) end)
       |> Enum.join(indentation(depth))
     else
-      raise "concept scheme contains a circle through #{
-              inspect(MapSet.intersection(concepts, visited) |> MapSet.to_list())
-            }"
+      raise "concept scheme contains a circle through #{inspect(MapSet.intersection(concepts, visited) |> MapSet.to_list())}"
     end
   end
 
