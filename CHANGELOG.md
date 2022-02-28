@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
+## Unreleased
+
+Elixir versions < 1.10 are no longer supported
+
+
+[Compare v0.1.5...HEAD](https://github.com/marcelotto/skout/compare/v0.1.5...HEAD)
+
+
+
 ## v0.1.5 - 2020-10-13
 
 - Upgrade to RDF.ex 0.9
