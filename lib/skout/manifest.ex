@@ -48,11 +48,11 @@ defmodule Skout.Manifest do
 
   defp normalize_base_iri(%{base_iri: nil} = manifest), do: manifest
 
-  defp normalize_base_iri(manifest) do
+  defp normalize_base_iri(%__MODULE__{} = manifest) do
     %__MODULE__{manifest | base_iri: IRI.coerce_base(manifest.base_iri)}
   end
 
-  defp normalize_label_type(%{label_type: label_type} = manifest)
+  defp normalize_label_type(%__MODULE__{label_type: label_type} = manifest)
        when is_binary(label_type) do
     %__MODULE__{manifest | label_type: String.to_atom(manifest.label_type)}
   end
@@ -62,14 +62,16 @@ defmodule Skout.Manifest do
   defp normalize_additional_concept_class(%{additional_concept_class: nil} = manifest),
     do: manifest
 
-  defp normalize_additional_concept_class(%{additional_concept_class: "<" <> iri} = manifest) do
+  defp normalize_additional_concept_class(
+         %__MODULE__{additional_concept_class: "<" <> iri} = manifest
+       ) do
     %__MODULE__{
       manifest
       | additional_concept_class: iri |> String.slice(0..-2//1) |> IRI.new()
     }
   end
 
-  defp normalize_additional_concept_class(manifest) do
+  defp normalize_additional_concept_class(%__MODULE__{} = manifest) do
     %__MODULE__{
       manifest
       | additional_concept_class:
@@ -81,7 +83,7 @@ defmodule Skout.Manifest do
     }
   end
 
-  defp normalize_iri_normalization(%{iri_normalization: iri_normalization} = manifest)
+  defp normalize_iri_normalization(%__MODULE__{iri_normalization: iri_normalization} = manifest)
        when is_binary(iri_normalization) do
     %__MODULE__{manifest | iri_normalization: String.to_atom(manifest.iri_normalization)}
   end
@@ -91,7 +93,7 @@ defmodule Skout.Manifest do
   defp normalize_materialization(%{materialization: %Materialization.Settings{}} = manifest),
     do: manifest
 
-  defp normalize_materialization(%{materialization: materialization} = manifest) do
+  defp normalize_materialization(%__MODULE__{materialization: materialization} = manifest) do
     %__MODULE__{
       manifest
       | materialization: struct(%Materialization.Settings{}, atomize_keys(materialization))

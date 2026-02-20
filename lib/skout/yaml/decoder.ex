@@ -87,13 +87,13 @@ defmodule Skout.YAML.Decoder do
     end
   end
 
-  defp build_concept_scheme(document, concept_scheme, _opts) do
+  defp build_concept_scheme(%Document{} = document, concept_scheme, _opts) do
     concept_scheme_iri = concept_scheme_iri(concept_scheme, document.manifest)
 
     {:ok,
      %Document{
        document
-       | manifest: %Manifest{document.manifest | concept_scheme: concept_scheme_iri},
+       | manifest: %{document.manifest | concept_scheme: concept_scheme_iri},
          skos: RDF.Graph.add(document.skos, concept_scheme_statements(concept_scheme_iri))
      }}
   end

@@ -93,7 +93,6 @@ defmodule Skout.YAML.Encoder do
   def encode!(document, opts \\ []) do
     case encode(document, opts) do
       {:ok, yaml} -> yaml
-      {:error, error} -> raise error
     end
   end
 
