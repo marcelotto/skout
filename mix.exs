@@ -9,7 +9,7 @@ defmodule Skout.MixProject do
     [
       app: :skout,
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -56,12 +56,12 @@ defmodule Skout.MixProject do
 
   defp deps do
     [
-      {:rdf, "~> 0.9"},
-      {:sparql, "~> 0.3.5"},
-      {:json_ld, "~> 0.3.3"},
+      {:rdf, "~> 2.0"},
+      {:sparql, "~> 0.3"},
+      {:json_ld, "~> 1.0"},
       {:yaml_elixir, "~> 2.4"},
       {:optimus, "~> 0.1"},
-      {:ex_doc, "~> 0.23", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false}
     ]
   end
 

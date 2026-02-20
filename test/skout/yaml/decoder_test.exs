@@ -41,7 +41,7 @@ defmodule Skout.YAML.DecoderTest do
                   |> Graph.add(
                     ex_base_iri()
                     |> RDF.type(SKOS.ConceptScheme)
-                    |> SKOS.hasTopConcept(EX.Foo, EX.Bar)
+                    |> SKOS.hasTopConcept([EX.Foo, EX.Bar])
                   )
                   |> Graph.add(
                     EX.Foo
@@ -393,16 +393,16 @@ defmodule Skout.YAML.DecoderTest do
                 manifest: ex_manifest(concept_scheme: ex_base_iri()),
                 skos:
                   EX.Foo
-                  |> RDF.type(SKOS.Concept, ~I<http://example.com/vocab/Class>)
+                  |> RDF.type([SKOS.Concept, ~I<http://example.com/vocab/Class>])
                   |> RDFS.subClassOf(~I<http://example.com/vocab/OtherClass>)
                   |> SKOS.prefLabel(~L"Foo")
                   |> SKOS.definition(~L"A foo is a ...")
                   |> SKOS.related(EX.Bar)
-                  |> SKOS.notation(XSD.true(), XSD.integer(42))
-                  |> RDFS.seeAlso(
+                  |> SKOS.notation([XSD.true(), XSD.integer(42)])
+                  |> RDFS.seeAlso([
                     ~I<http://example.com/other/Foo>,
                     ~I<http://example.com/other/Bar>
-                  )
+                  ])
                   |> SKOS.inScheme(ex_base_iri())
                   |> SKOS.topConceptOf(ex_base_iri())
                   |> Graph.new(prefixes: default_prefixes())
@@ -418,7 +418,7 @@ defmodule Skout.YAML.DecoderTest do
                   |> Graph.add(
                     ex_base_iri()
                     |> RDF.type(SKOS.ConceptScheme)
-                    |> SKOS.hasTopConcept(EX.Foo, EX.Bar)
+                    |> SKOS.hasTopConcept([EX.Foo, EX.Bar])
                   )
               }}
   end

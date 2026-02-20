@@ -54,16 +54,16 @@ defmodule Skout.YAML.EncoderTest do
                ])
                |> Graph.add(
                  EX.Foo
-                 |> SKOS.altLabel(42, 3.14, true, false)
+                 |> SKOS.altLabel([42, 3.14, true, false])
                )
                |> Graph.add(
                  EX.Bar
-                 |> RDF.type(EX.Type, EX.Foo)
-                 |> RDFS.seeAlso(
+                 |> RDF.type([EX.Type, EX.Foo])
+                 |> RDFS.seeAlso([
                    ~I<http://example.com/other/Bar>,
                    ~I<http://example.com/another/Bar>,
                    ~I<http://example.com/yet_another/Bar>
-                 )
+                 ])
                )
              end)
            ) ==
@@ -74,7 +74,7 @@ defmodule Skout.YAML.EncoderTest do
               label_type: #{@example_document.manifest.label_type}
               ---
               Foo:
-              - :altLabel: [42, 3.14, false, true]
+              - :altLabel: [42, 3.14E0, false, true]
               - :related: qux
               - Bar:
                 - :a: [:Foo, <http://example.com/Type>]

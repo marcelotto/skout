@@ -186,7 +186,7 @@ defmodule Skout.YAML.Encoder do
   end
 
   defp concept_label(concept, %Document{} = document, opts) do
-    if description = Graph.description(document.skos, concept) do
+    if description = Graph.get(document.skos, concept) do
       concept_label(concept, description, document, opts)
     end
   end
