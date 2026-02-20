@@ -9,7 +9,7 @@ defmodule Skout.MixProject do
     [
       app: :skout,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),

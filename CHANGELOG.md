@@ -7,7 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## Unreleased
 
-Elixir versions < 1.10 are no longer supported
+Upgrade to RDF.ex 2.1
+
+Elixir versions < 1.15 are no longer supported
 
 
 [Compare v0.1.5...HEAD](https://github.com/marcelotto/skout/compare/v0.1.5...HEAD)
