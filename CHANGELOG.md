@@ -12,6 +12,8 @@ Elixir versions < 1.15 are no longer supported
 ### Added
 
 - Stand-alone executable via Burrito
+- Output file in the CLI is now optional; when omitted, output is written to stdout
+  (default: Turtle for YAML input, YAML for RDF input)
 
 ### Changed
 

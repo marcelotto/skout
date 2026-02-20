@@ -1,0 +1,106 @@
+@prefix : <http://transport.data.gov.uk/def/vehicle-category/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+:
+    a skos:ConceptScheme ;
+    dct:title "Vehicle Types" ;
+    dct:creator "UK Department for Transport" ;
+    rdfs:isDefinedBy <http://www.dft.gov.uk/matrix/forms/definitions.aspx> ;
+    rdfs:seeAlso <https://www.jenitennison.com/2009/11/22/creating-linked-data-part-iii-defining-concept-schemes.html> ;
+    skos:hasTopConcept :AllMotorVehicles, :PedalCycles .
+
+:AllHGV
+    a skos:Concept ;
+    skos:broader :AllMotorVehicles ;
+    skos:inScheme : ;
+    skos:narrower :ArticulatedHGV, :RigidHGV ;
+    skos:prefLabel "All HGV" .
+
+:AllMotorVehicles
+    a skos:Concept ;
+    skos:inScheme : ;
+    skos:narrower :AllHGV, :BusesAndCoaches, :CarsAndTaxis, :LightVans, :TwoWheeledMotorVehicles ;
+    skos:prefLabel "All motor vehicles" ;
+    skos:topConceptOf : .
+
+:ArticulatedHGV
+    a skos:Concept ;
+    skos:broader :AllHGV ;
+    skos:inScheme : ;
+    skos:narrower :HGVa34, :HGVa5, :HGVa6 ;
+    skos:prefLabel "Articulated HGV" .
+
+:BusesAndCoaches
+    a skos:Concept ;
+    skos:broader :AllMotorVehicles ;
+    skos:inScheme : ;
+    skos:prefLabel "Buses and coaches" .
+
+:CarsAndTaxis
+    a skos:Concept ;
+    skos:broader :AllMotorVehicles ;
+    skos:inScheme : ;
+    skos:prefLabel "Cars and taxis" .
+
+:HGVa34
+    a skos:Concept ;
+    skos:broader :ArticulatedHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVa3/4" .
+
+:HGVa5
+    a skos:Concept ;
+    skos:broader :ArticulatedHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVa5" .
+
+:HGVa6
+    a skos:Concept ;
+    skos:broader :ArticulatedHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVa6" .
+
+:HGVr2
+    a skos:Concept ;
+    skos:broader :RigidHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVr2" .
+
+:HGVr3
+    a skos:Concept ;
+    skos:broader :RigidHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVr3" .
+
+:HGVr4
+    a skos:Concept ;
+    skos:broader :RigidHGV ;
+    skos:inScheme : ;
+    skos:prefLabel "HGVr4+" .
+
+:LightVans
+    a skos:Concept ;
+    skos:broader :AllMotorVehicles ;
+    skos:inScheme : ;
+    skos:prefLabel "Light vans" .
+
+:PedalCycles
+    a skos:Concept ;
+    skos:inScheme : ;
+    skos:prefLabel "Pedal cycles" ;
+    skos:topConceptOf : .
+
+:RigidHGV
+    a skos:Concept ;
+    skos:broader :AllHGV ;
+    skos:inScheme : ;
+    skos:narrower :HGVr2, :HGVr3, :HGVr4 ;
+    skos:prefLabel "Rigid HGV" .
+
+:TwoWheeledMotorVehicles
+    a skos:Concept ;
+    skos:broader :AllMotorVehicles ;
+    skos:inScheme : ;
+    skos:prefLabel "Two wheeled motor vehicles" .

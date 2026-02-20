@@ -34,7 +34,14 @@ defmodule Skout.CLI do
   end
 
   def main(argv) do
-    cli = parse_opts(argv)
+    case parse_opts(argv) do
+      cli when is_map(cli) -> run(cli)
+      code when is_integer(code) -> code
+    end
+    |> halt()
+  end
+
+  defp run(cli) do
     input = cli.args.input_file
     output = cli.args.output_file
 
@@ -44,17 +51,23 @@ defmodule Skout.CLI do
       |> Enum.reject(fn {_, value} -> is_nil(value) end)
       |> Keyword.new()
 
-    cli.options.input_type
-    |> file_type(input)
-    |> document(input, opts)
-    |> case do
+    input_type = file_type(cli.options.input_type, input)
+
+    output_type =
+      file_type(cli.options.output_type, output) ||
+        (!output && default_output_type(input_type)) ||
+        nil
+
+    case document(input_type, input, opts) do
       {:ok, document} ->
-        cli.options.output_type
-        |> file_type(output)
-        |> write(output, document, opts)
-        |> case do
+        result =
+          if output,
+            do: write_to_file(output_type, output, document, opts),
+            else: write_to_stdout(output_type, document, opts)
+
+        case result do
           :ok ->
-            IO.puts("Done.")
+            if output, do: IO.puts("Done.")
             0
 
           error ->
@@ -66,7 +79,6 @@ defmodule Skout.CLI do
         print_error(error)
         1
     end
-    |> System.halt()
   end
 
   def parse_opts(argv) do
@@ -87,9 +99,8 @@ defmodule Skout.CLI do
         ],
         output_file: [
           value_name: "OUTPUT_FILE",
-          help:
-            "Depending on the INPUT_TYPE if given or the extension either a Skout YAML document or an RDF serialization",
-          required: true,
+          help: "Output file path. When omitted, output is written to stdout.",
+          required: false,
           parser: :string
         ]
       ],
@@ -153,8 +164,11 @@ defmodule Skout.CLI do
         ]
       ]
     )
-    |> Optimus.parse!(argv)
+    |> Optimus.parse!(argv, &halt/1)
   end
+
+  defp file_type(nil, nil), do: nil
+  defp file_type(type, nil), do: Map.get(@file_type_mapping, String.to_atom(type))
 
   defp file_type(type, input) do
     (type && Map.get(@file_type_mapping, String.to_atom(type))) ||
@@ -166,6 +180,10 @@ defmodule Skout.CLI do
         |> String.to_atom()
       )
   end
+
+  defp default_output_type(:skout), do: :turtle
+  defp default_output_type(rdf_type) when rdf_type in @rdf_file_types, do: :skout
+  defp default_output_type(_), do: nil
 
   defp document(nil, _, _), do: {:error, "Unknown input type"}
 
@@ -188,14 +206,9 @@ defmodule Skout.CLI do
     end
   end
 
-  defp write(nil, _, _, _), do: {:error, "Unknown output type"}
+  defp write_to_file(nil, _, _, _), do: {:error, "Unknown output type"}
 
-  defp write(:skout, to, document, opts), do: write_yaml(document, to, opts)
-
-  defp write(output_type, to, document, opts) when output_type in @rdf_file_types,
-    do: write_rdf(document, to, output_type, opts)
-
-  defp write_yaml(document, to, opts) do
+  defp write_to_file(:skout, to, document, opts) do
     with {:ok, content} <- Document.to_yaml(document, opts) do
       case File.write(to, content, opts) do
         :ok -> :ok
@@ -204,19 +217,42 @@ defmodule Skout.CLI do
     end
   end
 
-  defp write_rdf(document, to, format, opts) do
+  defp write_to_file(output_type, to, document, opts) when output_type in @rdf_file_types do
     document
     |> Document.to_rdf()
     |> RDF.Serialization.write_file(
       to,
       opts
-      |> Keyword.put(:format, format)
+      |> Keyword.put(:format, output_type)
       |> Keyword.put(:force, true)
       |> Keyword.drop(~w[base base_iri]a)
     )
     |> case do
       :ok -> :ok
       error -> file_access_error(error, to)
+    end
+  end
+
+  defp write_to_stdout(nil, _, _), do: {:error, "Unknown output type"}
+
+  defp write_to_stdout(:skout, document, opts) do
+    with {:ok, content} <- Document.to_yaml(document, opts) do
+      IO.write(content)
+      :ok
+    end
+  end
+
+  defp write_to_stdout(output_type, document, opts) when output_type in @rdf_file_types do
+    with {:ok, content} <-
+           document
+           |> Document.to_rdf()
+           |> RDF.Serialization.write_string(
+             opts
+             |> Keyword.put(:format, output_type)
+             |> Keyword.drop(~w[base base_iri]a)
+           ) do
+      IO.write(content)
+      :ok
     end
   end
 
@@ -228,4 +264,10 @@ defmodule Skout.CLI do
   defp file_access_error({:error, :enospc}, _), do: {:error, "No space left on the device"}
   defp file_access_error({:error, :enomem}, _), do: {:error, "Out of memory"}
   defp file_access_error(error, _), do: error
+
+  if Mix.env() == :test do
+    defp halt(code), do: code
+  else
+    defp halt(code), do: System.halt(code)
+  end
 end
