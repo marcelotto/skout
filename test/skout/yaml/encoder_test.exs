@@ -74,7 +74,7 @@ defmodule Skout.YAML.EncoderTest do
               label_type: #{@example_document.manifest.label_type}
               ---
               Foo:
-              - :altLabel: [false, true, 3.14, 42]
+              - :altLabel: [42, 3.14, false, true]
               - :related: qux
               - Bar:
                 - :a: [:Foo, <http://example.com/Type>]

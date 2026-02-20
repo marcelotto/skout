@@ -65,7 +65,7 @@ defmodule Skout.Manifest do
   defp normalize_additional_concept_class(%{additional_concept_class: "<" <> iri} = manifest) do
     %__MODULE__{
       manifest
-      | additional_concept_class: iri |> String.slice(0..-2) |> IRI.new()
+      | additional_concept_class: iri |> String.slice(0..-2//1) |> IRI.new()
     }
   end
 
@@ -117,7 +117,7 @@ defmodule Skout.Manifest do
   def object_term("<" <> iri_string, _, _) do
     iri =
       iri_string
-      |> String.slice(0..-2)
+      |> String.slice(0..-2//1)
       |> RDF.iri()
 
     if IRI.valid?(iri) do

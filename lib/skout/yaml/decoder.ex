@@ -102,7 +102,7 @@ defmodule Skout.YAML.Decoder do
   defp concept_scheme_iri(true, manifest), do: manifest.base_iri
 
   defp concept_scheme_iri("<" <> concept_scheme, manifest),
-    do: concept_scheme |> String.slice(0..-2) |> concept_scheme_iri(manifest)
+    do: concept_scheme |> String.slice(0..-2//1) |> concept_scheme_iri(manifest)
 
   defp concept_scheme_iri(concept_scheme, manifest) do
     if IRI.absolute?(concept_scheme) do

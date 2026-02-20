@@ -101,6 +101,7 @@ defmodule Skout.YAML.Encoder do
     document.manifest
     |> Map.from_struct()
     |> Enum.reject(fn {key, value} -> is_nil(value) or key in [:materialization] end)
+    |> Enum.sort_by(fn {key, _} -> Atom.to_string(key) end)
     |> Enum.map(fn
       {:concept_scheme, description} ->
         concept_scheme(document, description, opts)
