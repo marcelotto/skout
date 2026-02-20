@@ -1,6 +1,6 @@
 # Skout
 
-[![CI](https://github.com/marcelotto/skout/workflows/CI/badge.svg?branch=master)](https://github.com/marcelotto/skout/actions?query=branch%3Amaster+workflow%3ACI)
+[![CI](https://github.com/marcelotto/skout/actions/workflows/ci.yml/badge.svg)](https://github.com/marcelotto/skout/actions/workflows/ci.yml)
 [![Hex.pm](https://img.shields.io/hexpm/v/skout.svg?style=flat-square)](https://hex.pm/packages/skout)
 
 
