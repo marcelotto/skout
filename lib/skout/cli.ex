@@ -24,6 +24,15 @@ defmodule Skout.CLI do
 
   @iri_normalization_methods ~w[camelize underscore]
 
+  def start(_type, _args) do
+    if System.get_env("__BURRITO") == "1" do
+      Burrito.Util.Args.get_arguments()
+      |> main()
+    else
+      {:ok, self()}
+    end
+  end
+
   def main(argv) do
     cli = parse_opts(argv)
     input = cli.args.input_file
@@ -46,14 +55,18 @@ defmodule Skout.CLI do
         |> case do
           :ok ->
             IO.puts("Done.")
+            0
 
           error ->
             print_error(error)
+            1
         end
 
       error ->
         print_error(error)
+        1
     end
+    |> System.halt()
   end
 
   def parse_opts(argv) do

@@ -7,9 +7,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## Unreleased
 
-Upgrade to RDF.ex 2.1
-
 Elixir versions < 1.15 are no longer supported
+
+### Added
+
+- Stand-alone executable via Burrito
+
+### Changed
+
+- Upgrade to RDF.ex 2.1
+- CLI now exits with proper exit codes (0 for success, 1 for errors)
 
 
 [Compare v0.1.5...HEAD](https://github.com/marcelotto/skout/compare/v0.1.5...HEAD)

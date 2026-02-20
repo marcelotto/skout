@@ -14,6 +14,7 @@ defmodule Skout.MixProject do
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
       escript: [main_module: Skout.CLI],
+      releases: releases(),
 
       # Hex
       package: package(),
@@ -48,8 +49,22 @@ defmodule Skout.MixProject do
     ]
   end
 
+  defp releases do
+    [
+      skout: [
+        steps: [:assemble, &Burrito.wrap/1],
+        burrito: [
+          targets: [
+            macos_arm: [os: :darwin, cpu: :aarch64]
+          ]
+        ]
+      ]
+    ]
+  end
+
   def application do
     [
+      mod: {Skout.CLI, []},
       extra_applications: [:logger]
     ]
   end
@@ -61,6 +76,7 @@ defmodule Skout.MixProject do
       {:json_ld, "~> 1.0"},
       {:yaml_elixir, "~> 2.4"},
       {:optimus, "~> 0.1"},
+      {:burrito, "~> 1.5"},
       {:ex_doc, "~> 0.40", only: :dev, runtime: false}
     ]
   end
